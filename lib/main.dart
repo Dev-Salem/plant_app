@@ -6,6 +6,7 @@ import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:plant_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:plant_app/features/onboarding/screens/welcome_screen.dart';
+import 'package:plant_app/features/scan/presentation/screens/home_screen.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -21,7 +22,7 @@ class MainApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case Routes.welcome:
@@ -58,14 +59,5 @@ class MainApp extends ConsumerWidget {
             ),
       ),
     );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text("Home")));
   }
 }

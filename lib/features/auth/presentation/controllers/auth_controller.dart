@@ -19,9 +19,15 @@ class AuthController extends _$AuthController {
 
   Future<void> verifyOtp(String otp) async {
     state = const AsyncLoading();
-    print(otp);
     state = await AsyncValue.guard(() async {
       await ref.read(authRepositoryProvider).verifyOTP(_userId, otp);
+    });
+  }
+
+  Future<void> signOut() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(authRepositoryProvider).signOut();
     });
   }
 

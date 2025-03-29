@@ -24,4 +24,12 @@ class AuthController extends _$AuthController {
       await ref.read(authRepositoryProvider).verifyOTP(_userId, otp);
     });
   }
+
+  Future<void> resendOtp(String email) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final result = await ref.read(authRepositoryProvider).signInWithEmail(email);
+      _userId = result;
+    });
+  }
 }

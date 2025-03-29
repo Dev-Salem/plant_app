@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/core/constants/routes.dart';
 import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'dart:async';
 
 class VerifyOtpScreen extends ConsumerStatefulWidget {
   const VerifyOtpScreen({super.key, required this.email});
@@ -19,12 +20,42 @@ class VerifyOtpScreen extends ConsumerStatefulWidget {
 class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
   final _pinController = TextEditingController();
   final _pinFocusNode = FocusNode();
+  Timer? _resendTimer;
+  int _remainingSeconds = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    _startResendTimer();
+  }
 
   @override
   void dispose() {
+    _resendTimer?.cancel();
     _pinController.dispose();
     _pinFocusNode.dispose();
     super.dispose();
+  }
+
+  void _startResendTimer() {
+    _remainingSeconds = 30;
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingSeconds > 0) {
+        setState(() {
+          _remainingSeconds--;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  void _handleResend() {
+    _pinController.clear();
+    _pinFocusNode.requestFocus();
+    ref.read(authControllerProvider.notifier).resendOtp(widget.email);
+    _startResendTimer();
   }
 
   void _verifyOtp(String pin) {
@@ -86,12 +117,19 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
             24.heightBox,
             Center(
               child: TextButton(
-                onPressed: () {
-                  // Implement resend OTP logic
-                  _pinController.clear();
-                  _pinFocusNode.requestFocus();
-                },
-                child: const Text('Resend Code'),
+                onPressed: (isLoading || _remainingSeconds > 0) ? null : _handleResend,
+                child:
+                    isLoading
+                        ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : Text(
+                          _remainingSeconds > 0
+                              ? 'Resend in ${_remainingSeconds}s'
+                              : 'Resend Code',
+                        ),
               ),
             ),
             const Spacer(),

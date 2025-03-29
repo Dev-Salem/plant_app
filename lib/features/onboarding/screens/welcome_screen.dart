@@ -1,7 +1,7 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:plant_app/core/assets.dart';
-import 'package:plant_app/core/routes.dart';
+import 'package:plant_app/core/constants/assets.dart';
+import 'package:plant_app/core/constants/routes.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class WelcomeScreen extends StatelessWidget {

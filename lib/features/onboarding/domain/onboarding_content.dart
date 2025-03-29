@@ -1,4 +1,4 @@
-import 'package:plant_app/core/assets.dart';
+import 'package:plant_app/core/constants/assets.dart';
 
 class OnboardingContent {
   final String image;

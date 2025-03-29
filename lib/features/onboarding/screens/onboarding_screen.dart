@@ -1,5 +1,6 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:plant_app/features/auth/presentation/screens/sign_in_screen.dart';
 import 'package:plant_app/features/onboarding/domain/onboarding_content.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -22,55 +23,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _currentPage = _pageController.page?.round() ?? 0;
       });
     });
-  }
-
-  void _showEmailBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder:
-          (context) => Padding(
-            padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              top: 16.0,
-              bottom: MediaQuery.viewInsetsOf(context).bottom + 16.0,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Enter your email to continue 🌿',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                16.heightBox,
-                TextFormField(
-                  decoration: InputDecoration(hintText: 'Email', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value?.isEmail != null && value!.isEmail) {
-                      return null;
-                    } else {
-                      return 'Please enter a valid email';
-                    }
-                  },
-                ),
-                16.heightBox,
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () {
-                      // // Handle email submission
-                      // Navigator.pop(context);
-                    },
-                    child: Text('Continue'),
-                  ),
-                ),
-                16.heightBox,
-              ],
-            ),
-          ),
-    );
   }
 
   @override
@@ -128,7 +80,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 curve: Curves.easeInOut,
                               );
                             } else {
-                              _showEmailBottomSheet();
+                              showBottomSheet(
+                                context: context,
+                                builder: (context) => SignInScreen(),
+                              );
                             }
                           },
                           icon: const Icon(Icons.arrow_forward),

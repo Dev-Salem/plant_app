@@ -19,18 +19,19 @@ class PlantDetailsView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // const SizedBox(height: 20),
+                // _buildOverviewCard(),
                 const SizedBox(height: 20),
-                _buildOverviewCard(),
-                const SizedBox(height: 20),
-                _buildSectionTitle('Health Analysis'),
-                _buildHealthCard(),
-                const SizedBox(height: 20),
-                _buildSectionTitle('Similar Plants'),
-                _buildSimilarPlantsSection(),
-                const SizedBox(height: 20),
-                _buildSectionTitle('Care Instructions'),
-                _buildCareInstructionsCard(),
-                const SizedBox(height: 20),
+                if (!scanResult.result.isHealthy) ...[
+                  _buildSectionTitle('Health Analysis'),
+                  _buildHealthCard(),
+                  const SizedBox(height: 20),
+                ],
+                if (scanResult.result.disease.suggestions.isNotEmpty) ...[
+                  _buildSectionTitle('Similar Conditions'),
+                  _buildSimilarPlantsSection(),
+                  const SizedBox(height: 20),
+                ],
                 _buildSectionTitle('Scan Details'),
                 _buildScanDetailsCard(),
                 const SizedBox(height: 30),
@@ -182,48 +183,48 @@ class PlantDetailsView extends StatelessWidget {
     );
   }
 
-  Widget _buildOverviewCard() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Plant Overview',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2E7D32),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildInfoRow(
-              'Scientific Name',
-              _getScientificName(),
-              Icons.spa,
-              Colors.green[700]!,
-            ),
-            const Divider(),
-            _buildInfoRow('Plant Type', _getPlantType(), Icons.category, Colors.blue[700]!),
-            if (!scanResult.result.isHealthy) ...[
-              const Divider(),
-              _buildInfoRow(
-                'Condition',
-                scanResult.result.disease.suggestions.isNotEmpty
-                    ? scanResult.result.disease.suggestions.first.name
-                    : 'Unknown issue',
-                Icons.healing,
-                Colors.orange,
-              ),
-            ],
-          ],
-        ),
-      ),
-    ).animate().fade(duration: 400.ms, delay: 100.ms);
-  }
+  // Widget _buildOverviewCard() {
+  //   return Card(
+  //     elevation: 2,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           const Text(
+  //             'Plant Overview',
+  //             style: TextStyle(
+  //               fontSize: 18,
+  //               fontWeight: FontWeight.bold,
+  //               color: Color(0xFF2E7D32),
+  //             ),
+  //           ),
+  //           const SizedBox(height: 12),
+  //           _buildInfoRow(
+  //             'Scientific Name',
+  //             _getScientificName(),
+  //             Icons.spa,
+  //             Colors.green[700]!,
+  //           ),
+  //           // const Divider(),
+  //           // _buildInfoRow('Plant Type', _getPlantType(), Icons.category, Colors.blue[700]!),
+  //           if (!scanResult.result.isHealthy) ...[
+  //             const Divider(),
+  //             _buildInfoRow(
+  //               'Condition',
+  //               scanResult.result.disease.suggestions.isNotEmpty
+  //                   ? scanResult.result.disease.suggestions.first.name
+  //                   : 'Unknown issue',
+  //               Icons.healing,
+  //               Colors.orange,
+  //             ),
+  //           ],
+  //         ],
+  //       ),
+  //     ),
+  //   ).animate().fade(duration: 400.ms, delay: 100.ms);
+  // }
 
   Widget _buildHealthCard() {
     final isHealthy = scanResult.result.isHealthy;
@@ -245,7 +246,7 @@ class PlantDetailsView extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  isHealthy ? 'Your plant is healthy' : 'Your plant needs attention',
+                  isHealthy ? 'Plant is healthy' : 'Plant needs attention',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -256,29 +257,18 @@ class PlantDetailsView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildHealthMeter(_getHealthScore()),
-            const SizedBox(height: 16),
-            Text(_getHealthDescription(), style: TextStyle(color: Colors.grey[700])),
             if (!isHealthy && scanResult.result.disease.suggestions.isNotEmpty) ...[
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 8),
-              const Text(
-                'Recommended Actions:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                'Detected: ${scanResult.result.disease.suggestions.first.name}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...List.generate(
-                _getRecommendedActions().length,
-                (index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.arrow_right, color: Colors.green[700]),
-                      Expanded(child: Text(_getRecommendedActions()[index])),
-                    ],
-                  ),
-                ),
+              Text(
+                'Confidence: ${(scanResult.result.disease.suggestions.first.probability * 100).toStringAsFixed(0)}%',
+                style: TextStyle(color: Colors.grey[700]),
               ),
             ],
           ],
@@ -409,75 +399,6 @@ class PlantDetailsView extends StatelessWidget {
     );
   }
 
-  Widget _buildCareInstructionsCard() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCareInstruction(
-              'Water',
-              'Regular watering, keep soil moist but not soggy',
-              Icons.water_drop,
-              Colors.blue,
-            ),
-            const Divider(),
-            _buildCareInstruction(
-              'Light',
-              'Bright, indirect sunlight is ideal',
-              Icons.wb_sunny,
-              Colors.amber,
-            ),
-            const Divider(),
-            _buildCareInstruction(
-              'Temperature',
-              'Keep between 65-80°F (18-27°C)',
-              Icons.thermostat,
-              Colors.orange,
-            ),
-            const Divider(),
-            _buildCareInstruction(
-              'Fertilizer',
-              'Apply balanced fertilizer monthly during growing season',
-              Icons.eco,
-              Colors.green,
-            ),
-          ],
-        ),
-      ),
-    ).animate().fade(duration: 400.ms, delay: 300.ms);
-  }
-
-  Widget _buildCareInstruction(String title, String instruction, IconData icon, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text(instruction, style: TextStyle(color: Colors.grey[700], fontSize: 14)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildScanDetailsCard() {
     return Card(
       elevation: 2,
@@ -596,16 +517,16 @@ class PlantDetailsView extends StatelessWidget {
 
   String _getScientificName() {
     if (scanResult.result.disease.suggestions.isNotEmpty) {
-      // In a real app, you might have the scientific name in your response
-      // This is a placeholder
-      return scanResult.result.disease.suggestions.first.name;
+      return scanResult.result.disease.suggestions.first.id;
     }
     return "Unknown";
   }
 
   String _getPlantType() {
-    // Placeholder - in a real app you'd have plant type classification
-    return "Flowering Plant";
+    if (scanResult.result.disease.suggestions.isNotEmpty) {
+      return scanResult.result.disease.suggestions.first.id.split('_')[0];
+    }
+    return "Unknown";
   }
 
   double _getTopConfidence() {
@@ -626,22 +547,19 @@ class PlantDetailsView extends StatelessWidget {
 
   String _getHealthDescription() {
     if (scanResult.result.isHealthy) {
-      return "Your plant appears to be in good health. Continue with your current care routine.";
+      return "Plant appears healthy based on analysis.";
     } else if (scanResult.result.disease.suggestions.isNotEmpty) {
-      return "Your plant shows signs of ${scanResult.result.disease.suggestions.first.name}. "
-          "This condition may affect the plant's growth and appearance if not addressed.";
+      var suggestion = scanResult.result.disease.suggestions.first;
+      double confidence = suggestion.probability * 100;
+      return "Analysis indicates ${suggestion.name} with ${confidence.toStringAsFixed(0)}% confidence.";
     }
-    return "Your plant may have some health issues that need attention.";
+    return "Analysis inconclusive.";
   }
 
   List<String> _getRecommendedActions() {
-    // Placeholder - in a real app, these would be specific to the detected disease
-    return [
-      "Check watering schedule and adjust if needed",
-      "Ensure proper sunlight exposure",
-      "Consider applying appropriate treatment for the condition",
-      "Remove affected leaves to prevent spread",
-    ];
+    // Since there's no treatment field in the Suggestion class according to entities.dart,
+    // we can't return any recommended actions based on the scan result
+    return [];
   }
 
   Color _getConfidenceColor(double confidence) {

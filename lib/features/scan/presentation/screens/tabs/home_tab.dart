@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:plant_app/features/scan/presentation/controllers/scan_controller.dart';
 import 'package:plant_app/features/scan/presentation/widgets/camera_widget.dart';
 import 'package:plant_app/features/scan/data/scan_repository.dart';
 

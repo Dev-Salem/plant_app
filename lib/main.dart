@@ -34,7 +34,7 @@ class MainApp extends ConsumerWidget {
             return MaterialPageRoute(builder: (context) => VerifyOtpScreen(email: email));
           case Routes.home:
             return MaterialPageRoute(builder: (context) => const HomeScreen());
-            
+
           default:
             return null;
         }

@@ -1,6 +1,7 @@
 class PlantScanResponse {
   final String accessToken;
   final String modelVersion;
+  final String? customId;
   final InputData input;
   final ScanResult result;
   final String status;
@@ -12,6 +13,7 @@ class PlantScanResponse {
   PlantScanResponse({
     required this.accessToken,
     required this.modelVersion,
+    this.customId,
     required this.input,
     required this.result,
     required this.status,
@@ -25,6 +27,7 @@ class PlantScanResponse {
     return PlantScanResponse(
       accessToken: json['access_token'],
       modelVersion: json['model_version'],
+      customId: json['custom_id'],
       input: InputData.fromJson(json['input']),
       result: ScanResult.fromJson(json['result']),
       status: json['status'],
@@ -40,7 +43,6 @@ class InputData {
   final double latitude;
   final double longitude;
   final bool similarImages;
-  final String health;
   final List<String> images;
   final String datetime;
 
@@ -48,7 +50,6 @@ class InputData {
     required this.latitude,
     required this.longitude,
     required this.similarImages,
-    required this.health,
     required this.images,
     required this.datetime,
   });
@@ -58,7 +59,6 @@ class InputData {
       latitude: json['latitude'],
       longitude: json['longitude'],
       similarImages: json['similar_images'],
-      health: json['health'],
       images: List<String>.from(json['images']),
       datetime: json['datetime'],
     );
@@ -67,16 +67,32 @@ class InputData {
 
 class ScanResult {
   final Disease disease;
-  final bool isHealthy;
-  final bool isPlant;
+  final PlantStatus isPlant;
+  final Crop crop;
 
-  ScanResult({required this.disease, required this.isHealthy, required this.isPlant});
+  ScanResult({required this.disease, required this.isPlant, required this.crop});
 
   factory ScanResult.fromJson(Map<String, dynamic> json) {
     return ScanResult(
       disease: Disease.fromJson(json['disease']),
-      isHealthy: json['is_healthy']['binary'],
-      isPlant: json['is_plant']['binary'],
+      isPlant: PlantStatus.fromJson(json['is_plant']),
+      crop: Crop.fromJson(json['crop']),
+    );
+  }
+}
+
+class PlantStatus {
+  final double probability;
+  final double threshold;
+  final bool binary;
+
+  PlantStatus({required this.probability, required this.threshold, required this.binary});
+
+  factory PlantStatus.fromJson(Map<String, dynamic> json) {
+    return PlantStatus(
+      probability: json['probability'].toDouble(),
+      threshold: json['threshold'].toDouble(),
+      binary: json['binary'],
     );
   }
 }
@@ -94,17 +110,34 @@ class Disease {
   }
 }
 
+class Crop {
+  final List<Suggestion> suggestions;
+
+  Crop({required this.suggestions});
+
+  factory Crop.fromJson(Map<String, dynamic> json) {
+    return Crop(
+      suggestions:
+          (json['suggestions'] as List).map((item) => Suggestion.fromJson(item)).toList(),
+    );
+  }
+}
+
 class Suggestion {
   final String id;
   final String name;
   final double probability;
   final List<SimilarImage> similarImages;
+  final SuggestionDetails? details;
+  final String scientificName;
 
   Suggestion({
     required this.id,
     required this.name,
     required this.probability,
     required this.similarImages,
+    this.details,
+    required this.scientificName,
   });
 
   factory Suggestion.fromJson(Map<String, dynamic> json) {
@@ -114,25 +147,38 @@ class Suggestion {
       probability: json['probability'].toDouble(),
       similarImages:
           (json['similar_images'] as List).map((item) => SimilarImage.fromJson(item)).toList(),
+      details: json['details'] != null ? SuggestionDetails.fromJson(json['details']) : null,
+      scientificName: json['scientific_name'],
     );
+  }
+}
+
+class SuggestionDetails {
+  final String language;
+  final String entityId;
+
+  SuggestionDetails({required this.language, required this.entityId});
+
+  factory SuggestionDetails.fromJson(Map<String, dynamic> json) {
+    return SuggestionDetails(language: json['language'], entityId: json['entity_id']);
   }
 }
 
 class SimilarImage {
   final String id;
   final String url;
-  final String licenseName;
-  final String licenseUrl;
-  final String citation;
+  final String? licenseName;
+  final String? licenseUrl;
+  final String? citation;
   final double similarity;
   final String urlSmall;
 
   SimilarImage({
     required this.id,
     required this.url,
-    required this.licenseName,
-    required this.licenseUrl,
-    required this.citation,
+    this.licenseName,
+    this.licenseUrl,
+    this.citation,
     required this.similarity,
     required this.urlSmall,
   });

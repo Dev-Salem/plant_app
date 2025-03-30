@@ -19,10 +19,10 @@ class PlantDetailsView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // const SizedBox(height: 20),
-                // _buildOverviewCard(),
                 const SizedBox(height: 20),
-                if (!scanResult.result.isHealthy) ...[
+                _buildOverviewCard(),
+                const SizedBox(height: 20),
+                if (!_isHealthy()) ...[
                   _buildSectionTitle('Health Analysis'),
                   _buildHealthCard(),
                   const SizedBox(height: 20),
@@ -119,8 +119,8 @@ class PlantDetailsView extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       _buildStatusBadge(
-                        scanResult.result.isHealthy ? 'Healthy' : 'Unhealthy',
-                        scanResult.result.isHealthy ? Colors.green : Colors.orange,
+                        _isHealthy() ? 'Healthy' : 'Unhealthy',
+                        _isHealthy() ? Colors.green : Colors.orange,
                         Icons.favorite,
                       ),
                       _buildStatusBadge(
@@ -128,8 +128,7 @@ class PlantDetailsView extends StatelessWidget {
                         _getConfidenceColor(_getTopConfidence()),
                         Icons.verified,
                       ),
-                      if (!scanResult.result.isHealthy &&
-                          scanResult.result.disease.suggestions.isNotEmpty)
+                      if (!_isHealthy() && scanResult.result.disease.suggestions.isNotEmpty)
                         _buildStatusBadge(
                           'Needs Attention',
                           Colors.red,
@@ -183,51 +182,51 @@ class PlantDetailsView extends StatelessWidget {
     );
   }
 
-  // Widget _buildOverviewCard() {
-  //   return Card(
-  //     elevation: 2,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           const Text(
-  //             'Plant Overview',
-  //             style: TextStyle(
-  //               fontSize: 18,
-  //               fontWeight: FontWeight.bold,
-  //               color: Color(0xFF2E7D32),
-  //             ),
-  //           ),
-  //           const SizedBox(height: 12),
-  //           _buildInfoRow(
-  //             'Scientific Name',
-  //             _getScientificName(),
-  //             Icons.spa,
-  //             Colors.green[700]!,
-  //           ),
-  //           // const Divider(),
-  //           // _buildInfoRow('Plant Type', _getPlantType(), Icons.category, Colors.blue[700]!),
-  //           if (!scanResult.result.isHealthy) ...[
-  //             const Divider(),
-  //             _buildInfoRow(
-  //               'Condition',
-  //               scanResult.result.disease.suggestions.isNotEmpty
-  //                   ? scanResult.result.disease.suggestions.first.name
-  //                   : 'Unknown issue',
-  //               Icons.healing,
-  //               Colors.orange,
-  //             ),
-  //           ],
-  //         ],
-  //       ),
-  //     ),
-  //   ).animate().fade(duration: 400.ms, delay: 100.ms);
-  // }
+  Widget _buildOverviewCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Plant Overview',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E7D32),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildInfoRow(
+              'Scientific Name',
+              _getScientificName(),
+              Icons.spa,
+              Colors.green[700]!,
+            ),
+            const Divider(),
+            _buildInfoRow('ID', scanResult.accessToken, Icons.category, Colors.blue[700]!),
+            if (true) ...[
+              const Divider(),
+              _buildInfoRow(
+                'Condition',
+                scanResult.result.disease.suggestions.isNotEmpty
+                    ? scanResult.result.disease.suggestions.first.name
+                    : 'Unknown issue',
+                Icons.healing,
+                Colors.orange,
+              ),
+            ],
+          ],
+        ),
+      ),
+    ).animate().fade(duration: 400.ms, delay: 100.ms);
+  }
 
   Widget _buildHealthCard() {
-    final isHealthy = scanResult.result.isHealthy;
+    final isHealthy = _isHealthy();
 
     return Card(
       elevation: 2,
@@ -509,6 +508,11 @@ class PlantDetailsView extends StatelessWidget {
 
   // Helper methods
   String _getPlantName() {
+    // First check crop suggestions as they're more reliable
+    if (scanResult.result.crop.suggestions.isNotEmpty) {
+      return scanResult.result.crop.suggestions.first.name;
+    }
+    // Fallback to disease suggestions
     if (scanResult.result.disease.suggestions.isNotEmpty) {
       return scanResult.result.disease.suggestions.first.name;
     }
@@ -516,50 +520,47 @@ class PlantDetailsView extends StatelessWidget {
   }
 
   String _getScientificName() {
+    // First check crop suggestions
+    if (scanResult.result.crop.suggestions.isNotEmpty) {
+      return scanResult.result.crop.suggestions.first.scientificName;
+    }
+    // Fallback to disease suggestions
     if (scanResult.result.disease.suggestions.isNotEmpty) {
-      return scanResult.result.disease.suggestions.first.id;
+      return scanResult.result.disease.suggestions.first.scientificName;
     }
     return "Unknown";
   }
 
-  String _getPlantType() {
+  bool _isHealthy() {
+    // Check if plant has been identified as healthy using PlantStatus
     if (scanResult.result.disease.suggestions.isNotEmpty) {
-      return scanResult.result.disease.suggestions.first.id.split('_')[0];
+      final suggestion = scanResult.result.disease.suggestions.first;
+      return suggestion.name.toLowerCase() == "healthy" &&
+          suggestion.probability > scanResult.result.isPlant.threshold;
     }
-    return "Unknown";
-  }
-
-  double _getTopConfidence() {
-    if (scanResult.result.disease.suggestions.isNotEmpty) {
-      return scanResult.result.disease.suggestions.first.probability;
-    }
-    return 0.0;
+    return false;
   }
 
   double _getHealthScore() {
-    if (!scanResult.result.isHealthy && scanResult.result.disease.suggestions.isNotEmpty) {
+    if (!_isHealthy() && scanResult.result.disease.suggestions.isNotEmpty) {
       // If unhealthy, base health score on inverse of disease probability
-      return 1.0 - (scanResult.result.disease.suggestions.first.probability * 0.8);
+      // and consider the plant status threshold
+      final diseaseProb = scanResult.result.disease.suggestions.first.probability;
+      final threshold = scanResult.result.isPlant.threshold;
+      return 1.0 - (diseaseProb * (1 - threshold));
     }
-    // If healthy, high health score
-    return 0.95;
+    // If healthy, use plant status probability
+    return scanResult.result.isPlant.probability;
   }
 
-  String _getHealthDescription() {
-    if (scanResult.result.isHealthy) {
-      return "Plant appears healthy based on analysis.";
-    } else if (scanResult.result.disease.suggestions.isNotEmpty) {
-      var suggestion = scanResult.result.disease.suggestions.first;
-      double confidence = suggestion.probability * 100;
-      return "Analysis indicates ${suggestion.name} with ${confidence.toStringAsFixed(0)}% confidence.";
+  double _getTopConfidence() {
+    if (scanResult.result.crop.suggestions.isNotEmpty) {
+      return scanResult.result.crop.suggestions.first.probability;
     }
-    return "Analysis inconclusive.";
-  }
-
-  List<String> _getRecommendedActions() {
-    // Since there's no treatment field in the Suggestion class according to entities.dart,
-    // we can't return any recommended actions based on the scan result
-    return [];
+    if (scanResult.result.disease.suggestions.isNotEmpty) {
+      return scanResult.result.disease.suggestions.first.probability;
+    }
+    return scanResult.result.isPlant.probability;
   }
 
   Color _getConfidenceColor(double confidence) {

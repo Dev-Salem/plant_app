@@ -35,11 +35,11 @@ class ScanResultDetails extends StatelessWidget {
           const SizedBox(height: 8),
 
           Text(
-            'Health status: ${scanResponse.result.isHealthy ? "Healthy" : "Needs attention"}',
+            'Health status: ${_isHealthy() ? "Healthy" : "Needs attention"}',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: scanResponse.result.isHealthy ? Colors.green : Colors.orange,
+              color: _isHealthy() ? Colors.green : Colors.orange,
             ),
           ),
 
@@ -61,9 +61,33 @@ class ScanResultDetails extends StatelessWidget {
   }
 
   String _getPlantName() {
+    // First check crop suggestions as they're more likely to have the plant name
+    if (scanResponse.result.crop.suggestions.isNotEmpty) {
+      return scanResponse.result.crop.suggestions.first.name;
+    }
+    // Fallback to disease suggestions if no crops found
     if (scanResponse.result.disease.suggestions.isNotEmpty) {
       return scanResponse.result.disease.suggestions.first.name;
     }
     return "Unknown Plant";
+  }
+
+  bool _isHealthy() {
+    // Check if any of the disease suggestions is "healthy" with high probability
+    if (scanResponse.result.disease.suggestions.isNotEmpty) {
+      // If the top suggestion is "healthy", consider it healthy
+      final topSuggestion = scanResponse.result.disease.suggestions.first;
+      if (topSuggestion.name.toLowerCase() == "healthy" && topSuggestion.probability > 0.5) {
+        return true;
+      }
+
+      // Otherwise check if there's a "healthy" suggestion with significant probability
+      for (var suggestion in scanResponse.result.disease.suggestions) {
+        if (suggestion.name.toLowerCase() == "healthy" && suggestion.probability > 0.7) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

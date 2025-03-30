@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:plant_app/features/auth/data/auth_repository.dart';
+import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'scan_repository.g.dart';
@@ -12,7 +14,7 @@ part 'scan_repository.g.dart';
 class ScanRepository {
   ScanRepository({required this.client});
   final Client client;
-  Future<Map<String, dynamic>> scanPlant({
+  Future<PlantScanResponse> scanPlant({
     required String imagePath,
     required double longitude,
     required double latitude,
@@ -53,7 +55,7 @@ class ScanRepository {
       log("\n===================\n");
       log(response.toString());
       log("\n===================\n");
-      return response;
+      return PlantScanResponse.fromJson(response);
     } catch (e) {
       // Log the error and rethrow
       log('Error in scanPlant: $e');
@@ -67,3 +69,19 @@ ScanRepository scanRepository(Ref ref) {
   final client = ref.watch(appwriteClientProvider);
   return ScanRepository(client: client);
 }
+
+final scanResultProvider = FutureProvider.family<PlantScanResponse, String>((
+  ref,
+  String imagePath,
+) async {
+  final position = await Geolocator.getCurrentPosition();
+
+  // Call repository method
+  final scanRepository = ref.read(scanRepositoryProvider);
+  final result = await scanRepository.scanPlant(
+    imagePath: imagePath,
+    longitude: position.longitude,
+    latitude: position.latitude,
+  );
+  return result;
+});

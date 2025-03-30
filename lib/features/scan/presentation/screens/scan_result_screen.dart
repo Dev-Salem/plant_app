@@ -1,34 +1,45 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:plant_app/features/scan/presentation/controllers/scan_controller.dart';
-import 'package:plant_app/features/scan/presentation/widgets/scan_result_details.dart';
+import 'package:plant_app/features/scan/data/scan_repository.dart';
+import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.dart';
 
 class ScanResultScreen extends ConsumerWidget {
-  const ScanResultScreen({super.key});
+  final String? imagePath;
+
+  const ScanResultScreen({super.key, this.imagePath});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentScan = ref.watch(currentScanNotifierProvider);
-    final scanState = ref.watch(scanNotifierProvider);
-
-    if (scanState.hasError) {
-      return _buildErrorScreen(context, scanState.error.toString());
+    if (imagePath == null) {
+      return _buildErrorScreen(context, "No image provided");
     }
 
-    if (currentScan == null) {
-      return _buildErrorScreen(context, "No scan results available");
-    }
+    final scanResultAsync = ref.watch(scanResultProvider.call(imagePath!));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan Results'),
-        backgroundColor: Colors.green[700],
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: ScanResultContent(scanResult: currentScan),
+    return scanResultAsync.when(
+      loading:
+          () => Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(color: Colors.green),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Analyzing your plant...',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      error: (error, stack) => _buildErrorScreen(context, error.toString()),
+      data: (scanResult) => Scaffold(body: PlantDetailsView(scanResult: scanResult)),
     );
   }
 
@@ -77,123 +88,5 @@ class ScanResultScreen extends ConsumerWidget {
         ).animate().fade(duration: 300.ms).slideY(begin: 0.2, end: 0),
       ),
     );
-  }
-}
-
-class ScanResultContent extends StatelessWidget {
-  final ScanResult scanResult;
-
-  const ScanResultContent({super.key, required this.scanResult});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Image Preview
-          SizedBox(
-            height: 300,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.file(File(scanResult.imagePath), fit: BoxFit.cover),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
-                      stops: const [0.6, 1.0],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  right: 20,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        scanResult.plantName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: _getConfidenceColor(scanResult.confidence),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'Confidence: ${scanResult.confidenceFormatted}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          if (scanResult.healthAssessment != null) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: scanResult.isHealthy ? Colors.green : Colors.orange,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                scanResult.isHealthy ? 'Healthy' : 'Unhealthy',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      if (scanResult.topDisease != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Issue: ${scanResult.topDisease!.name}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Detailed results
-          ScanResultDetails(scanResult: scanResult),
-        ],
-      ),
-    );
-  }
-
-  Color _getConfidenceColor(double confidence) {
-    if (confidence >= 0.8) return Colors.green;
-    if (confidence >= 0.5) return Colors.orange;
-    return Colors.red;
   }
 }

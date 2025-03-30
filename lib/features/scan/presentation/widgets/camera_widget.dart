@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:plant_app/features/scan/data/scan_repository.dart';
 import 'package:plant_app/features/scan/presentation/controllers/scan_controller.dart';
 import 'package:plant_app/features/scan/presentation/screens/scan_result_screen.dart';
 
@@ -352,28 +353,11 @@ class CameraScreen extends ConsumerWidget {
       builder: (context) => const ProcessingDialog(),
     );
 
-    // Process the image with scan controller
-    ref
-        .read(scanNotifierProvider.notifier)
-        .scanPlant(
-          imagePath,
-          onSuccess: () {
-            // Close loading dialog and navigate to result screen
-            Navigator.pop(context); // Close dialog
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const ScanResultScreen()),
-            );
-          },
-        )
-        .then((_) {
-          // Handle any errors that weren't caught by onSuccess
-          final scanState = ref.read(scanNotifierProvider);
-          if (scanState.hasError) {
-            Navigator.pop(context); // Close dialog
-            _showErrorSnackBar(context, scanState.error.toString());
-          }
-        });
+    Navigator.pop(context); // Close dialog
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) =>  ScanResultScreen(imagePath: imagePath)),
+    );
   }
 
   void _showErrorSnackBar(BuildContext context, String errorMessage) {

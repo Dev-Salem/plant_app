@@ -7,6 +7,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:plant_app/features/scan/presentation/controllers/scan_controller.dart';
 import 'package:plant_app/features/scan/presentation/widgets/camera_widget.dart';
+import 'package:plant_app/features/scan/data/scan_repository.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -109,7 +110,7 @@ class _HomeTabState extends State<HomeTab> {
           const SizedBox(height: 24),
           Consumer(
             builder: (context, ref, child) {
-              final scanState = ref.watch(scanNotifierProvider);
+              // final scanState = ref.watch(scanNotifierProvider);
 
               return InkWell(
                     onTap: () {
@@ -210,46 +211,52 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Widget _buildRecentDiagnoses() {
-    return Column(
-      children: List.generate(
-            2,
-            (index) => Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: Colors.grey.shade200),
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                leading: CircleAvatar(
-                  backgroundColor: Colors.green.withOpacity(0.1),
-                  child: Icon(Icons.eco, color: Colors.green[700]),
-                ),
-                title: Text(
-                  'Plant Disease ${index + 1}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 6.0),
-                  child: Text(
-                    'Diagnosed on ${DateTime.now().toString().split(' ')[0]}',
-                    style: TextStyle(color: Colors.grey[600]),
+    return Consumer(
+      builder: (context, ref, child) {
+        // We could implement a provider to keep track of recent scans if needed
+        // For now, just showing a placeholder
+        return Column(
+          children: List.generate(
+                2,
+                (index) => Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.green.withOpacity(0.1),
+                      child: Icon(Icons.eco, color: Colors.green[700]),
+                    ),
+                    title: Text(
+                      'Plant Disease ${index + 1}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 6.0),
+                      child: Text(
+                        'Diagnosed on ${DateTime.now().toString().split(' ')[0]}',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
                   ),
                 ),
-                trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+              )
+              .animate(interval: 200.ms)
+              .fade(duration: 400.ms, delay: 600.ms)
+              .slideY(
+                begin: 0.3,
+                end: 0,
+                duration: 400.ms,
+                delay: 600.ms,
+                curve: Curves.easeOutQuad,
               ),
-            ),
-          )
-          .animate(interval: 200.ms)
-          .fade(duration: 400.ms, delay: 600.ms)
-          .slideY(
-            begin: 0.3,
-            end: 0,
-            duration: 400.ms,
-            delay: 600.ms,
-            curve: Curves.easeOutQuad,
-          ),
+        );
+      },
     );
   }
 

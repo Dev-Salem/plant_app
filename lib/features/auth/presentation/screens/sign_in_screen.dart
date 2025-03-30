@@ -20,9 +20,6 @@ class SignInScreen extends ConsumerWidget {
             (error, _) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(HandleError.getFriendlyErrorMessage(error as Exception))),
             ),
-        data: (_) {
-          Navigator.pushNamed(context, Routes.verifyOtp, arguments: _emailController.text);
-        },
       );
     });
 
@@ -71,12 +68,27 @@ class SignInScreen extends ConsumerWidget {
                         ? null
                         : () {
                           if (_formKey.currentState?.validate() == true) {
-                            ref
-                                .read(authControllerProvider.notifier)
-                                .signInWithEmail(_emailController.text);
+                            // Send OTP and navigate to OTP verification screen
+                            ref.read(authControllerProvider.notifier).signInWithEmail(
+                              _emailController.text,
+                              () {
+                                Navigator.pushNamed(
+                                  context,
+                                  Routes.verifyOtp,
+                                  arguments: _emailController.text,
+                                );
+                              },
+                            );
                           }
                         },
-                child: isLoading ? const CircularProgressIndicator() : const Text('Continue'),
+                child:
+                    isLoading
+                        ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(),
+                        )
+                        : const Text('Continue'),
               ),
             ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.3),
           ],

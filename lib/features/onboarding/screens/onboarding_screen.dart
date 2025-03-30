@@ -92,6 +92,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         .animate(autoPlay: true, onPlay: (controller) => controller.repeat())
                         .shimmer(duration: 2000.ms, delay: 1000.ms),
                   ),
+                  32.heightBox,
                 ],
               ),
         ),

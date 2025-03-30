@@ -1,7 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:plant_app/features/scan/presentation/controllers/scan_controller.dart';
+import 'package:plant_app/features/scan/presentation/widgets/camera_widget.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -102,54 +107,74 @@ class _HomeTabState extends State<HomeTab> {
                 curve: Curves.easeOutQuad,
               ),
           const SizedBox(height: 24),
-          InkWell(
-                onTap: () {
-                  // TODO: Implement camera scanning
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 28.0, horizontal: 16.0),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.2),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.camera_alt, size: 60, color: Colors.white.withOpacity(0.95)),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Scan Plant',
-                        style: TextStyle(
-                          fontSize: 26,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
+          Consumer(
+            builder: (context, ref, child) {
+              final scanState = ref.watch(scanNotifierProvider);
+
+              return InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder:
+                              (context) => const CameraScreen(
+                                onImageCaptured: null, // We'll handle this in CameraScreen
+                              ),
                         ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 28.0, horizontal: 16.0),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.2),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Identify plant diseases instantly',
-                        style: TextStyle(fontSize: 15, color: Colors.white.withOpacity(0.85)),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.camera_alt,
+                            size: 60,
+                            color: Colors.white.withOpacity(0.95),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Scan Plant',
+                            style: TextStyle(
+                              fontSize: 26,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Identify plant diseases instantly',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.white.withOpacity(0.85),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              )
-              .animate()
-              .fade(duration: 700.ms, delay: 300.ms)
-              .scale(begin: const Offset(0.95, 0.95), duration: 700.ms, delay: 300.ms)
-              .shimmer(duration: 1200.ms, delay: 1000.ms),
+                    ),
+                  )
+                  .animate()
+                  .fade(duration: 700.ms, delay: 300.ms)
+                  .scale(begin: const Offset(0.95, 0.95), duration: 700.ms, delay: 300.ms)
+                  .shimmer(duration: 1200.ms, delay: 1000.ms);
+            },
+          ),
           const SizedBox(height: 32),
 
           Text(

@@ -1,6 +1,6 @@
 class TestAccount {
   static const String userId = 'test_account';
-  static const String phone = '+16735553130';
-  static const String email = 'dev.salemsaleh+test@gmail.com';
-  static const String otp = '304042';
+  static const String phone = '+17385555891';
+  static const String email = 'test@example.com';
+  static const String otp = '620125';
 }

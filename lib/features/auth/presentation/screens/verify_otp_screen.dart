@@ -54,13 +54,22 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
   void _handleResend() {
     _pinController.clear();
     _pinFocusNode.requestFocus();
-    ref.read(authControllerProvider.notifier).resendOtp(widget.email);
+
+    // Resend OTP with callback for success
+    ref.read(authControllerProvider.notifier).resendOtp(widget.email, () {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('OTP resent successfully')));
+    });
     _startResendTimer();
   }
 
   void _verifyOtp(String pin) {
     if (pin.length == 6) {
-      ref.read(authControllerProvider.notifier).verifyOtp(pin);
+      // Verify OTP with callback to navigate to home screen on success
+      ref.read(authControllerProvider.notifier).verifyOtp(pin, () {
+        Navigator.pushNamedAndRemoveUntil(context, Routes.home, (route) => false);
+      });
     }
   }
 
@@ -72,9 +81,6 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
             (error, _) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(HandleError.getFriendlyErrorMessage(error as Exception))),
             ),
-        data: (_) {
-          Navigator.pushNamedAndRemoveUntil(context, Routes.home, (route) => false);
-        },
       );
     });
 

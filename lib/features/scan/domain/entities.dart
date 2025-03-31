@@ -1,4 +1,7 @@
-class PlantScanResponse {
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:equatable/equatable.dart';
+
+class PlantScanResponse extends Equatable {
   final String accessToken;
   final String modelVersion;
   final String? customId;
@@ -10,7 +13,7 @@ class PlantScanResponse {
   final double created;
   final double completed;
 
-  PlantScanResponse({
+  const PlantScanResponse({
     required this.accessToken,
     required this.modelVersion,
     this.customId,
@@ -37,16 +40,31 @@ class PlantScanResponse {
       completed: json['completed'].toDouble(),
     );
   }
+
+  @override
+  List<Object> get props {
+    return [
+      accessToken,
+      modelVersion,
+      input,
+      result,
+      status,
+      slaCompliantClient,
+      slaCompliantSystem,
+      created,
+      completed,
+    ];
+  }
 }
 
-class InputData {
+class InputData extends Equatable {
   final double latitude;
   final double longitude;
   final bool similarImages;
   final List<String> images;
   final String datetime;
 
-  InputData({
+  const InputData({
     required this.latitude,
     required this.longitude,
     required this.similarImages,
@@ -63,14 +81,19 @@ class InputData {
       datetime: json['datetime'],
     );
   }
+
+  @override
+  List<Object> get props {
+    return [latitude, longitude, similarImages, images, datetime];
+  }
 }
 
-class ScanResult {
+class ScanResult extends Equatable {
   final Disease disease;
   final PlantStatus isPlant;
   final Crop crop;
 
-  ScanResult({required this.disease, required this.isPlant, required this.crop});
+  const ScanResult({required this.disease, required this.isPlant, required this.crop});
 
   factory ScanResult.fromJson(Map<String, dynamic> json) {
     return ScanResult(
@@ -79,6 +102,9 @@ class ScanResult {
       crop: Crop.fromJson(json['crop']),
     );
   }
+
+  @override
+  List<Object> get props => [disease, isPlant, crop];
 }
 
 class PlantStatus {
@@ -97,10 +123,10 @@ class PlantStatus {
   }
 }
 
-class Disease {
+class Disease extends Equatable {
   final List<Suggestion> suggestions;
 
-  Disease({required this.suggestions});
+  const Disease({required this.suggestions});
 
   factory Disease.fromJson(Map<String, dynamic> json) {
     return Disease(
@@ -108,6 +134,9 @@ class Disease {
           (json['suggestions'] as List).map((item) => Suggestion.fromJson(item)).toList(),
     );
   }
+
+  @override
+  List<Object> get props => [suggestions];
 }
 
 class Crop {
@@ -123,7 +152,7 @@ class Crop {
   }
 }
 
-class Suggestion {
+class Suggestion extends Equatable {
   final String id;
   final String name;
   final double probability;
@@ -131,7 +160,7 @@ class Suggestion {
   final SuggestionDetails? details;
   final String scientificName;
 
-  Suggestion({
+  const Suggestion({
     required this.id,
     required this.name,
     required this.probability,
@@ -151,20 +180,28 @@ class Suggestion {
       scientificName: json['scientific_name'],
     );
   }
+
+  @override
+  List<Object> get props {
+    return [id, name, probability, similarImages, scientificName];
+  }
 }
 
-class SuggestionDetails {
+class SuggestionDetails extends Equatable {
   final String language;
   final String entityId;
 
-  SuggestionDetails({required this.language, required this.entityId});
+  const SuggestionDetails({required this.language, required this.entityId});
 
   factory SuggestionDetails.fromJson(Map<String, dynamic> json) {
     return SuggestionDetails(language: json['language'], entityId: json['entity_id']);
   }
+
+  @override
+  List<Object> get props => [language, entityId];
 }
 
-class SimilarImage {
+class SimilarImage extends Equatable {
   final String id;
   final String url;
   final String? licenseName;
@@ -173,7 +210,7 @@ class SimilarImage {
   final double similarity;
   final String urlSmall;
 
-  SimilarImage({
+  const SimilarImage({
     required this.id,
     required this.url,
     this.licenseName,
@@ -193,5 +230,10 @@ class SimilarImage {
       similarity: json['similarity'].toDouble(),
       urlSmall: json['url_small'],
     );
+  }
+
+  @override
+  List<Object> get props {
+    return [id, url, similarity, urlSmall];
   }
 }

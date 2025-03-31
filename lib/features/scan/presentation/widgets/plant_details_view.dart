@@ -1,47 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:plant_app/features/scan/data/scan_repository.dart';
 import 'package:plant_app/features/scan/domain/entities.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/features/scan/presentation/controllers/controllers.dart';
 
-class PlantDetailsView extends StatelessWidget {
+class PlantDetailsView extends ConsumerWidget {
   final PlantScanResponse scanResult;
 
   const PlantDetailsView({super.key, required this.scanResult});
 
   @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      slivers: [
-        _buildSliverAppBar(context),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                _buildOverviewCard(),
-                const SizedBox(height: 20),
-                if (!_isHealthy()) ...[
-                  _buildSectionTitle('Health Analysis'),
-                  _buildHealthCard(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref.watch(savedScansProvider).isLoading;
+    ref.listen(
+      savedScansProvider,
+      (_, state) {},
+      onError: (error, stackTrace) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.toString()), duration: const Duration(seconds: 2)),
+        );
+      },
+    );
+    return Scaffold(
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          _buildSliverAppBar(context),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const SizedBox(height: 20),
-                ],
-                if (scanResult.result.disease.suggestions.isNotEmpty) ...[
-                  _buildSectionTitle('Similar Conditions'),
-                  _buildSimilarPlantsSection(),
+                  _buildOverviewCard(),
                   const SizedBox(height: 20),
+                  // if (!_isHealthy()) ...[
+                  //   _buildSectionTitle('Health Analysis'),
+                  //   _buildHealthCard(),
+                  //   const SizedBox(height: 20),
+                  // ],
+                  if (scanResult.result.disease.suggestions.isNotEmpty) ...[
+                    _buildSectionTitle('Similar Conditions'),
+                    _buildSimilarPlantsSection(),
+                    const SizedBox(height: 20),
+                  ],
+                  _buildSectionTitle('Scan Details'),
+                  _buildScanDetailsCard(),
+                  const SizedBox(height: 30),
+                  _buildActionButtons(context, ref, isLoading),
+                  const SizedBox(height: 40),
                 ],
-                _buildSectionTitle('Scan Details'),
-                _buildScanDetailsCard(),
-                const SizedBox(height: 30),
-                _buildActionButtons(context),
-                const SizedBox(height: 40),
-              ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -118,22 +133,22 @@ class PlantDetailsView extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _buildStatusBadge(
-                        _isHealthy() ? 'Healthy' : 'Unhealthy',
-                        _isHealthy() ? Colors.green : Colors.orange,
-                        Icons.favorite,
-                      ),
+                      // _buildStatusBadge(
+                      //   _isHealthy() ? 'Healthy' : 'Unhealthy',
+                      //   _isHealthy() ? Colors.green : Colors.orange,
+                      //   Icons.favorite,
+                      // ),
                       _buildStatusBadge(
                         '${(_getTopConfidence() * 100).toStringAsFixed(0)}% Match',
                         _getConfidenceColor(_getTopConfidence()),
                         Icons.verified,
                       ),
-                      if (!_isHealthy() && scanResult.result.disease.suggestions.isNotEmpty)
-                        _buildStatusBadge(
-                          'Needs Attention',
-                          Colors.red,
-                          Icons.warning_amber_rounded,
-                        ),
+                      // if (!_isHealthy() && scanResult.result.disease.suggestions.isNotEmpty)
+                      //   _buildStatusBadge(
+                      //     'Needs Attention',
+                      //     Colors.red,
+                      //     Icons.warning_amber_rounded,
+                      //   ),
                     ],
                   ),
                 ],
@@ -223,89 +238,6 @@ class PlantDetailsView extends StatelessWidget {
         ),
       ),
     ).animate().fade(duration: 400.ms, delay: 100.ms);
-  }
-
-  Widget _buildHealthCard() {
-    final isHealthy = _isHealthy();
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isHealthy ? Icons.check_circle : Icons.warning_amber_rounded,
-                  color: isHealthy ? Colors.green : Colors.orange,
-                  size: 28,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  isHealthy ? 'Plant is healthy' : 'Plant needs attention',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isHealthy ? Colors.green : Colors.orange,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildHealthMeter(_getHealthScore()),
-            if (!isHealthy && scanResult.result.disease.suggestions.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 8),
-              Text(
-                'Detected: ${scanResult.result.disease.suggestions.first.name}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Confidence: ${(scanResult.result.disease.suggestions.first.probability * 100).toStringAsFixed(0)}%',
-                style: TextStyle(color: Colors.grey[700]),
-              ),
-            ],
-          ],
-        ),
-      ),
-    ).animate().fade(duration: 400.ms, delay: 200.ms);
-  }
-
-  Widget _buildHealthMeter(double healthScore) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Health Score',
-              style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold),
-            ),
-            Text(
-              '${(healthScore * 100).toStringAsFixed(0)}%',
-              style: TextStyle(
-                color: _getHealthColor(healthScore),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        LinearProgressIndicator(
-          value: healthScore,
-          backgroundColor: Colors.grey[200],
-          valueColor: AlwaysStoppedAnimation<Color>(_getHealthColor(healthScore)),
-          minHeight: 10,
-          borderRadius: BorderRadius.circular(5),
-        ),
-      ],
-    );
   }
 
   Widget _buildSimilarPlantsSection() {
@@ -435,7 +367,7 @@ class PlantDetailsView extends StatelessWidget {
     ).animate().fade(duration: 400.ms, delay: 400.ms);
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref, bool isLoading) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -452,12 +384,19 @@ class PlantDetailsView extends StatelessWidget {
         ),
         const SizedBox(width: 16),
         OutlinedButton.icon(
-          onPressed: () {
-            // Save functionality could be implemented here
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Scan saved to your collection')));
-          },
+          onPressed:
+              isLoading
+                  ? null
+                  : () {
+                    ref.read(savedScansProvider.notifier).saveNewScan(scanResult, () async {
+                      ref.invalidate(plantDetectionsProvider);
+                      await ref.read(plantDetectionsProvider.future);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Scan saved successfully!')),
+                      );
+                    });
+                  },
+
           icon: const Icon(Icons.save_alt),
           label: const Text('Save'),
           style: OutlinedButton.styleFrom(

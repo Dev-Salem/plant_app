@@ -5,4 +5,5 @@ class Routes {
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String verifyOtp = '/verify-otp';
+  static const String plantDetails = '/plant-details';
 }

@@ -24,5 +24,25 @@ final scanRepositoryProvider = Provider<ScanRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ScanRepositoryRef = ProviderRef<ScanRepository>;
+String _$plantDetectionsHash() => r'c5ad3da0ae550e3627e91f9491ffdc37bb2da8c6';
+
+/// See also [plantDetections].
+@ProviderFor(plantDetections)
+final plantDetectionsProvider =
+    AutoDisposeFutureProvider<List<PlantScanResponse>>.internal(
+      plantDetections,
+      name: r'plantDetectionsProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$plantDetectionsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef PlantDetectionsRef =
+    AutoDisposeFutureProviderRef<List<PlantScanResponse>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

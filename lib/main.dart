@@ -6,7 +6,9 @@ import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:plant_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:plant_app/features/onboarding/screens/welcome_screen.dart';
+import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:plant_app/features/scan/presentation/screens/home_screen.dart';
+import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -34,7 +36,12 @@ class MainApp extends ConsumerWidget {
             return MaterialPageRoute(builder: (context) => VerifyOtpScreen(email: email));
           case Routes.home:
             return MaterialPageRoute(builder: (context) => const HomeScreen());
-
+          case Routes.plantDetails:
+            return MaterialPageRoute(
+              builder:
+                  (context) =>
+                      PlantDetailsView(scanResult: settings.arguments as PlantScanResponse),
+            );
           default:
             return null;
         }

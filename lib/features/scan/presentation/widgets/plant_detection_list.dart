@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/features/scan/data/scan_repository.dart';
@@ -15,6 +17,7 @@ class PlantDetectionList extends ConsumerWidget {
 
     return plantsAsync.when(
       data: (plants) {
+        log(plants.length.toString());
         if (plants.isEmpty) {
           return _buildEmptyState();
         }
@@ -81,7 +84,7 @@ class PlantDetectionList extends ConsumerWidget {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: plants.length > 3 ? 3 : plants.length, // Show only 3 recent items
+      itemCount: plants.length, // Show only 3 recent items
       itemBuilder: (context, index) {
         final plant = plants[index];
         return _buildPlantCard(context, plant, index);

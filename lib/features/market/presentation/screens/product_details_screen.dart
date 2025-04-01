@@ -34,13 +34,9 @@ class ProductDetailsScreen extends ConsumerWidget {
                       // Product images
                       AspectRatio(
                         aspectRatio: 1,
-                        child: PageView(
-                          children: [
-                            Image.network(product.imageUrl, fit: BoxFit.cover),
-                            ...product.additionalImages.map(
-                              (url) => Image.network(url, fit: BoxFit.cover),
-                            ),
-                          ],
+                        child: Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.local_florist, size: 96, color: Colors.grey),
                         ),
                       ),
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/features/market/presentation/screens/order_confirmation_screen.dart';
+import 'package:plant_app/features/market/presentation/screens/shipping_address_form.dart';
 import '../../domain/entities.dart';
 import '../controllers/market_controllers.dart';
 
@@ -69,7 +71,12 @@ class _CartItemTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
-        Image.network(item.product.imageUrl, width: 80, height: 80, fit: BoxFit.cover),
+        Container(
+          width: 80,
+          height: 80,
+          color: Colors.grey[200],
+          child: const Icon(Icons.local_florist, size: 32, color: Colors.grey),
+        ),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -89,14 +96,18 @@ class _CartItemTile extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.remove),
               onPressed: () {
-                // TODO: Implement decrease quantity
+                ref
+                    .read(cartNotifierProvider.notifier)
+                    .updateItemQuantity(item.product, item.quantity - 1);
               },
             ),
             Text(item.quantity.toString()),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
-                // TODO: Implement increase quantity
+                ref
+                    .read(cartNotifierProvider.notifier)
+                    .updateItemQuantity(item.product, item.quantity + 1);
               },
             ),
           ],
@@ -106,13 +117,13 @@ class _CartItemTile extends ConsumerWidget {
   }
 }
 
-class _CartSummary extends StatelessWidget {
+class _CartSummary extends ConsumerWidget {
   final Cart cart;
 
   const _CartSummary({required this.cart});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -128,9 +139,7 @@ class _CartSummary extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {
-              // TODO: Implement checkout
-            },
+            onPressed: () => _processCheckout(context, ref, cart),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
@@ -141,5 +150,49 @@ class _CartSummary extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _processCheckout(BuildContext context, WidgetRef ref, Cart cart) async {
+    // Show address form before creating order
+    if (!context.mounted) return;
+
+    final result = await Navigator.of(context).push<(Address, Address)>(
+      MaterialPageRoute(
+        builder:
+            (_) => ShippingAddressForm(
+              onSubmit: (shipping, billing) {
+                Navigator.of(context).pop((shipping, billing));
+              },
+            ),
+      ),
+    );
+
+    if (result == null || !context.mounted) return;
+
+    final (shippingAddress, billingAddress) = result;
+
+    final order = Order(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      userId: cart.userId,
+      items: cart.items,
+      status: OrderStatus.pending,
+      total: cart.subtotal,
+      shippingAddress: shippingAddress,
+      subtotal: cart.subtotal,
+      tax: 0,
+      shippingCost: 30,
+      paymentMethod: "Credit Card",
+      billingAddress: billingAddress,
+      createdAt: DateTime.now(),
+    );
+
+    await ref.read(ordersProvider.notifier).createOrder(order, () async {
+      await ref.read(cartNotifierProvider.notifier).clearCart();
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => OrderConfirmationScreen(order: order)),
+        );
+      }
+    });
   }
 }

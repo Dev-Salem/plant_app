@@ -81,11 +81,11 @@ class _OrderCard extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          item.product.imageUrl,
+                        child: Container(
                           width: 60,
                           height: 60,
-                          fit: BoxFit.cover,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.local_florist, size: 24, color: Colors.grey),
                         ),
                       ),
                       const SizedBox(width: 16),

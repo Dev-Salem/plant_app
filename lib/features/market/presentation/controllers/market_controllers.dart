@@ -121,6 +121,31 @@ class CartNotifier extends _$CartNotifier {
       return state.value!.copyWith(items: []);
     });
   }
+
+  Future<void> updateItemQuantity(Product product, int newQuantity) async {
+    if (state.value == null) return;
+    if (newQuantity < 0) return;
+
+    final cart = state.value!;
+    final updatedItems = [...cart.items];
+    final itemIndex = updatedItems.indexWhere((item) => item.product.id == product.id);
+
+    if (itemIndex != -1) {
+      if (newQuantity == 0) {
+        updatedItems.removeAt(itemIndex);
+      } else {
+        updatedItems[itemIndex] = CartItem(
+          id: updatedItems[itemIndex].id,
+          product: product,
+          quantity: newQuantity,
+        );
+      }
+
+      final updatedCart = cart.copyWith(items: updatedItems, updatedAt: DateTime.now());
+
+      await updateCart(updatedCart);
+    }
+  }
 }
 
 @riverpod
@@ -156,5 +181,3 @@ class Orders extends _$Orders {
     });
   }
 }
-
-

@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
+import 'dart:developer';
 
 class Product extends Equatable {
   final String id;
@@ -70,22 +71,42 @@ class Product extends Equatable {
     'review_count': reviewCount,
   };
 
-  factory Product.fromJson(Map<String, dynamic> json) => Product(
-    id: json['id'] as String,
-    name: json['name'] as String,
-    description: json['description'] as String,
-    price: (json['price'] as num).toDouble(),
-    discountPrice: (json['discount_price'] as num?)?.toDouble() ?? 0.0,
-    imageUrl: json['image_url'] as String,
-    additionalImages:
-        (json['additional_images'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-    stockQuantity: json['stock_quantity'] as int,
-    category: Category.fromJson(json['category'] as Map<String, dynamic>),
-    isFeatured: json['is_featured'] as bool? ?? false,
-    tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-    rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
-    reviewCount: json['review_count'] as int? ?? 0,
-  );
+  factory Product.fromJson(Map<String, dynamic> json) {
+    log('Parsing product JSON: $json');
+
+    // Handle the case where we have categoryId instead of category object
+    Map<String, dynamic> categoryJson;
+    if (json['category'] == null && json['categoryId'] != null) {
+      categoryJson = {
+        'id': json['categoryId'],
+        'name': 'Loading...',
+        'description': '',
+        'image_url': '',
+      };
+    } else {
+      categoryJson =
+          json['category'] as Map<String, dynamic>? ??
+          {'id': 'unknown', 'name': 'Unknown', 'description': '', 'image_url': ''};
+    }
+
+    return Product(
+      id: json['id'] as String? ?? json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      price: (json['price'] as num).toDouble(),
+      discountPrice: (json['discount_price'] as num?)?.toDouble() ?? 0.0,
+      imageUrl: json['image_url'] as String,
+      additionalImages:
+          (json['additional_images'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          [],
+      stockQuantity: json['stock_quantity'] as int,
+      category: Category.fromJson(categoryJson),
+      isFeatured: json['is_featured'] as bool? ?? false,
+      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+      reviewCount: json['review_count'] as int? ?? 0,
+    );
+  }
 
   Product copyWith({
     String? id,

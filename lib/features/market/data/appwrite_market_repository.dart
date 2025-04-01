@@ -29,7 +29,15 @@ class AppwriteMarketRepository implements MarketRepository {
       databaseId: _databaseId,
       collectionId: _productsCollection,
     );
-    return result.documents.map((doc) => Product.fromJson(doc.data)).toList();
+    log('Raw products data: ${result.documents.map((doc) => doc.data)}');
+    return result.documents.map((doc) {
+      try {
+        return Product.fromJson(doc.data);
+      } catch (e, stackTrace) {
+        log('Error parsing product: ${doc.data}', error: e, stackTrace: stackTrace);
+        rethrow;
+      }
+    }).toList();
   }
 
   @override
@@ -39,7 +47,13 @@ class AppwriteMarketRepository implements MarketRepository {
       collectionId: _productsCollection,
       documentId: id,
     );
-    return Product.fromJson(doc.data);
+    log('Raw product data: ${doc.data}');
+    try {
+      return Product.fromJson(doc.data);
+    } catch (e, stackTrace) {
+      log('Error parsing product: ${doc.data}', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
   }
 
   @override

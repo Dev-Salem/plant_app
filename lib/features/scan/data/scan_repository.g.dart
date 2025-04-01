@@ -24,7 +24,7 @@ final scanRepositoryProvider = Provider<ScanRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ScanRepositoryRef = ProviderRef<ScanRepository>;
-String _$plantDetectionsHash() => r'c5ad3da0ae550e3627e91f9491ffdc37bb2da8c6';
+String _$plantDetectionsHash() => r'5aece7c791d9abde9ed0c6f03b3498ebab5f4cae';
 
 /// See also [plantDetections].
 @ProviderFor(plantDetections)

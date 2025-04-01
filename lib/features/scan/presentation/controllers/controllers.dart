@@ -13,24 +13,22 @@ class SavedScans extends _$SavedScans {
 
   Future<void> saveNewScan(PlantScanResponse scan, VoidCallback onSuccess) async {
     state = const AsyncLoading();
-    try {
-      final repository = ref.read(scanRepositoryProvider);
+    final repository = ref.read(scanRepositoryProvider);
+    state = await AsyncValue.guard(() async {
       await repository.saveAccessToken(scan.accessToken);
-      state = AsyncData([...?state.value, scan.accessToken]);
+      return [...?state.value, scan.accessToken];
+    });
+    if (!state.hasError) {
       onSuccess();
-    } catch (e, st) {
-      state = AsyncError(e, st);
     }
   }
 
   Future<void> deleteScan(String token) async {
     state = const AsyncLoading();
-    try {
-      final repository = ref.read(scanRepositoryProvider);
-      await repository.deleteAccessToken(token);
-      state = AsyncData(state.value?.where((t) => t != token).toList() ?? []);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+    final repository = ref.read(scanRepositoryProvider);
+    state = await AsyncValue.guard(() async {
+      repository.deleteAccessToken(token);
+     return state.value?.where((element) => element != token).toList()?? [];
+    });
   }
 }

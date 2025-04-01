@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 
 class Product extends Equatable {
@@ -82,6 +83,38 @@ class Product extends Equatable {
     rating: json['rating'] ?? 0.0,
     reviewCount: json['review_count'] ?? 0,
   );
+
+  Product copyWith({
+    String? id,
+    String? name,
+    String? description,
+    double? price,
+    double? discountPrice,
+    String? imageUrl,
+    List<String>? additionalImages,
+    int? stockQuantity,
+    Category? category,
+    bool? isFeatured,
+    List<String>? tags,
+    double? rating,
+    int? reviewCount,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      discountPrice: discountPrice ?? this.discountPrice,
+      imageUrl: imageUrl ?? this.imageUrl,
+      additionalImages: additionalImages ?? this.additionalImages,
+      stockQuantity: stockQuantity ?? this.stockQuantity,
+      category: category ?? this.category,
+      isFeatured: isFeatured ?? this.isFeatured,
+      tags: tags ?? this.tags,
+      rating: rating ?? this.rating,
+      reviewCount: reviewCount ?? this.reviewCount,
+    );
+  }
 }
 
 /// Category entity for classifying products
@@ -114,6 +147,20 @@ class Category extends Equatable {
     description: json['description'],
     imageUrl: json['image_url'],
   );
+
+  Category copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? imageUrl,
+  }) {
+    return Category(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
+  }
 }
 
 /// User entity for customer information
@@ -154,6 +201,24 @@ class User extends Equatable {
     addresses: (json['addresses'] as List?)?.map((a) => Address.fromJson(a)).toList() ?? [],
     profilePictureUrl: json['profile_picture_url'],
   );
+
+  User copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? phoneNumber,
+    List<Address>? addresses,
+    String? profilePictureUrl,
+  }) {
+    return User(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      addresses: addresses ?? this.addresses,
+      profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
+    );
+  }
 }
 
 /// Address entity for shipping and billing
@@ -202,6 +267,28 @@ class Address extends Equatable {
     label: json['label'],
     isDefault: json['is_default'] ?? false,
   );
+
+  Address copyWith({
+    String? id,
+    String? street,
+    String? city,
+    String? state,
+    String? country,
+    String? postalCode,
+    String? label,
+    bool? isDefault,
+  }) {
+    return Address(
+      id: id ?? this.id,
+      street: street ?? this.street,
+      city: city ?? this.city,
+      state: state ?? this.state,
+      country: country ?? this.country,
+      postalCode: postalCode ?? this.postalCode,
+      label: label ?? this.label,
+      isDefault: isDefault ?? this.isDefault,
+    );
+  }
 }
 
 /// Cart entity to hold items before purchase
@@ -247,6 +334,22 @@ class Cart extends Equatable {
     createdAt: DateTime.parse(json['created_at']),
     updatedAt: DateTime.parse(json['updated_at']),
   );
+
+  Cart copyWith({
+    String? id,
+    String? userId,
+    List<CartItem>? items,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Cart(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      items: items ?? this.items,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }
 
 /// CartItem entity representing a product in the cart
@@ -274,6 +377,18 @@ class CartItem extends Equatable {
     product: Product.fromJson(json['product']),
     quantity: json['quantity'],
   );
+
+  CartItem copyWith({
+    String? id,
+    Product? product,
+    int? quantity,
+  }) {
+    return CartItem(
+      id: id ?? this.id,
+      product: product ?? this.product,
+      quantity: quantity ?? this.quantity,
+    );
+  }
 }
 
 /// Order entity for completed purchases
@@ -421,4 +536,26 @@ class Review extends Equatable {
     imageUrls: List<String>.from(json['image_urls'] ?? []),
     createdAt: DateTime.parse(json['created_at']),
   );
+
+  Review copyWith({
+    String? id,
+    String? productId,
+    String? userId,
+    String? userName,
+    double? rating,
+    String? comment,
+    List<String>? imageUrls,
+    DateTime? createdAt,
+  }) {
+    return Review(
+      id: id ?? this.id,
+      productId: productId ?? this.productId,
+      userId: userId ?? this.userId,
+      userName: userName ?? this.userName,
+      rating: rating ?? this.rating,
+      comment: comment ?? this.comment,
+      imageUrls: imageUrls ?? this.imageUrls,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }

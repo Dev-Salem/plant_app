@@ -1,6 +1,10 @@
 import 'package:appwrite/appwrite.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/features/auth/data/auth_repository.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../domain/entities.dart';
 import 'market_repository.dart';
+part 'appwrite_market_repository.g.dart';
 
 class AppwriteMarketRepository implements MarketRepository {
   final Databases _databases;
@@ -263,4 +267,11 @@ class AppwriteMarketRepository implements MarketRepository {
     );
     return Product.fromJson(doc.data);
   }
+}
+
+@riverpod
+AppwriteMarketRepository marketRepository(Ref ref) {
+  final database = Databases(ref.watch(appwriteClientProvider));
+  final databaseId = "planty-db-id";
+  return AppwriteMarketRepository(databases: database, databaseId: databaseId);
 }

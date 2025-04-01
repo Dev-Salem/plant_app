@@ -36,21 +36,23 @@ class Product extends Equatable {
   bool get isInStock => stockQuantity > 0;
 
   @override
-  List<Object?> get props => [
-    id,
-    name,
-    description,
-    price,
-    discountPrice,
-    imageUrl,
-    additionalImages,
-    stockQuantity,
-    category,
-    isFeatured,
-    tags,
-    rating,
-    reviewCount,
-  ];
+  List<Object> get props {
+    return [
+      id,
+      name,
+      description,
+      price,
+      discountPrice,
+      imageUrl,
+      additionalImages,
+      stockQuantity,
+      category,
+      isFeatured,
+      tags,
+      rating,
+      reviewCount,
+    ];
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -69,19 +71,20 @@ class Product extends Equatable {
   };
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
-    id: json['id'],
-    name: json['name'],
-    description: json['description'],
-    price: json['price'],
-    discountPrice: json['discount_price'] ?? 0.0,
-    imageUrl: json['image_url'],
-    additionalImages: List<String>.from(json['additional_images'] ?? []),
-    stockQuantity: json['stock_quantity'],
-    category: Category.fromJson(json['category']),
-    isFeatured: json['is_featured'] ?? false,
-    tags: List<String>.from(json['tags'] ?? []),
-    rating: json['rating'] ?? 0.0,
-    reviewCount: json['review_count'] ?? 0,
+    id: json['id'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String,
+    price: (json['price'] as num).toDouble(),
+    discountPrice: (json['discount_price'] as num?)?.toDouble() ?? 0.0,
+    imageUrl: json['image_url'] as String,
+    additionalImages:
+        (json['additional_images'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+    stockQuantity: json['stock_quantity'] as int,
+    category: Category.fromJson(json['category'] as Map<String, dynamic>),
+    isFeatured: json['is_featured'] as bool? ?? false,
+    tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+    rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+    reviewCount: json['review_count'] as int? ?? 0,
   );
 
   Product copyWith({
@@ -142,18 +145,13 @@ class Category extends Equatable {
   };
 
   factory Category.fromJson(Map<String, dynamic> json) => Category(
-    id: json['id'],
-    name: json['name'],
-    description: json['description'],
-    imageUrl: json['image_url'],
+    id: json['id'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String,
+    imageUrl: json['image_url'] as String,
   );
 
-  Category copyWith({
-    String? id,
-    String? name,
-    String? description,
-    String? imageUrl,
-  }) {
+  Category copyWith({String? id, String? name, String? description, String? imageUrl}) {
     return Category(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -161,6 +159,9 @@ class Category extends Equatable {
       imageUrl: imageUrl ?? this.imageUrl,
     );
   }
+
+  @override
+  bool get stringify => true;
 }
 
 /// User entity for customer information
@@ -194,12 +195,16 @@ class User extends Equatable {
   };
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-    id: json['id'],
-    name: json['name'],
-    email: json['email'],
-    phoneNumber: json['phone_number'],
-    addresses: (json['addresses'] as List?)?.map((a) => Address.fromJson(a)).toList() ?? [],
-    profilePictureUrl: json['profile_picture_url'],
+    id: json['id'] as String,
+    name: json['name'] as String,
+    email: json['email'] as String,
+    phoneNumber: json['phone_number'] as String,
+    addresses:
+        (json['addresses'] as List<dynamic>?)
+            ?.map((a) => Address.fromJson(a as Map<String, dynamic>))
+            .toList() ??
+        [],
+    profilePictureUrl: json['profile_picture_url'] as String?,
   );
 
   User copyWith({
@@ -219,6 +224,9 @@ class User extends Equatable {
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
     );
   }
+
+  @override
+  bool get stringify => true;
 }
 
 /// Address entity for shipping and billing
@@ -258,14 +266,14 @@ class Address extends Equatable {
   };
 
   factory Address.fromJson(Map<String, dynamic> json) => Address(
-    id: json['id'],
-    street: json['street'],
-    city: json['city'],
-    state: json['state'],
-    country: json['country'],
-    postalCode: json['postal_code'],
-    label: json['label'],
-    isDefault: json['is_default'] ?? false,
+    id: json['id'] as String,
+    street: json['street'] as String,
+    city: json['city'] as String,
+    state: json['state'] as String,
+    country: json['country'] as String,
+    postalCode: json['postal_code'] as String,
+    label: json['label'] as String?,
+    isDefault: json['is_default'] as bool? ?? false,
   );
 
   Address copyWith({
@@ -289,6 +297,9 @@ class Address extends Equatable {
       isDefault: isDefault ?? this.isDefault,
     );
   }
+
+  @override
+  bool get stringify => true;
 }
 
 /// Cart entity to hold items before purchase
@@ -328,11 +339,14 @@ class Cart extends Equatable {
   };
 
   factory Cart.fromJson(Map<String, dynamic> json) => Cart(
-    id: json['id'],
-    userId: json['user_id'],
-    items: (json['items'] as List).map((i) => CartItem.fromJson(i)).toList(),
-    createdAt: DateTime.parse(json['created_at']),
-    updatedAt: DateTime.parse(json['updated_at']),
+    id: json['id'] as String,
+    userId: json['user_id'] as String,
+    items:
+        (json['items'] as List<dynamic>)
+            .map((i) => CartItem.fromJson(i as Map<String, dynamic>))
+            .toList(),
+    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
   );
 
   Cart copyWith({
@@ -350,6 +364,9 @@ class Cart extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  @override
+  bool get stringify => true;
 }
 
 /// CartItem entity representing a product in the cart
@@ -373,22 +390,21 @@ class CartItem extends Equatable {
   };
 
   factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
-    id: json['id'],
-    product: Product.fromJson(json['product']),
-    quantity: json['quantity'],
+    id: json['id'] as String,
+    product: Product.fromJson(json['product'] as Map<String, dynamic>),
+    quantity: json['quantity'] as int,
   );
 
-  CartItem copyWith({
-    String? id,
-    Product? product,
-    int? quantity,
-  }) {
+  CartItem copyWith({String? id, Product? product, int? quantity}) {
     return CartItem(
       id: id ?? this.id,
       product: product ?? this.product,
       quantity: quantity ?? this.quantity,
     );
   }
+
+  @override
+  bool get stringify => true;
 }
 
 /// Order entity for completed purchases
@@ -461,21 +477,29 @@ class Order extends Equatable {
   };
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
-    id: json['id'],
-    userId: json['user_id'],
-    items: (json['items'] as List).map((i) => CartItem.fromJson(i)).toList(),
-    shippingAddress: Address.fromJson(json['shipping_address']),
-    billingAddress: Address.fromJson(json['billing_address']),
-    subtotal: json['subtotal'],
-    tax: json['tax'],
-    shippingCost: json['shipping_cost'],
-    total: json['total'],
-    paymentMethod: json['payment_method'],
-    status: OrderStatus.values.byName(json['status']),
-    createdAt: DateTime.parse(json['created_at']),
-    shippedAt: json['shipped_at'] != null ? DateTime.parse(json['shipped_at']) : null,
-    deliveredAt: json['delivered_at'] != null ? DateTime.parse(json['delivered_at']) : null,
+    id: json['id'] as String,
+    userId: json['user_id'] as String,
+    items:
+        (json['items'] as List<dynamic>)
+            .map((i) => CartItem.fromJson(i as Map<String, dynamic>))
+            .toList(),
+    shippingAddress: Address.fromJson(json['shipping_address'] as Map<String, dynamic>),
+    billingAddress: Address.fromJson(json['billing_address'] as Map<String, dynamic>),
+    subtotal: (json['subtotal'] as num).toDouble(),
+    tax: (json['tax'] as num).toDouble(),
+    shippingCost: (json['shipping_cost'] as num).toDouble(),
+    total: (json['total'] as num).toDouble(),
+    paymentMethod: json['payment_method'] as String,
+    status: OrderStatus.values.byName(json['status'] as String),
+    createdAt: DateTime.parse(json['created_at'] as String),
+    shippedAt:
+        json['shipped_at'] != null ? DateTime.parse(json['shipped_at'] as String) : null,
+    deliveredAt:
+        json['delivered_at'] != null ? DateTime.parse(json['delivered_at'] as String) : null,
   );
+
+  @override
+  bool get stringify => true;
 }
 
 /// Order status enum
@@ -527,14 +551,14 @@ class Review extends Equatable {
   };
 
   factory Review.fromJson(Map<String, dynamic> json) => Review(
-    id: json['id'],
-    productId: json['product_id'],
-    userId: json['user_id'],
-    userName: json['user_name'],
-    rating: json['rating'],
-    comment: json['comment'],
-    imageUrls: List<String>.from(json['image_urls'] ?? []),
-    createdAt: DateTime.parse(json['created_at']),
+    id: json['id'] as String,
+    productId: json['product_id'] as String,
+    userId: json['user_id'] as String,
+    userName: json['user_name'] as String,
+    rating: (json['rating'] as num).toDouble(),
+    comment: json['comment'] as String,
+    imageUrls: (json['image_urls'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+    createdAt: DateTime.parse(json['created_at'] as String),
   );
 
   Review copyWith({

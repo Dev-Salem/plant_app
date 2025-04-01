@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,6 +17,7 @@ class MarketScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('Plant Market'),
         actions: [
           IconButton(
@@ -71,7 +74,9 @@ class MarketScreen extends ConsumerWidget {
                         },
                       ),
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, s) => Center(child: Text('Error: $e')),
+                  error: (e, s) {
+                    return Center(child: Text('Error: $e'));
+                  },
                 ),
               ),
             ),
@@ -105,7 +110,11 @@ class MarketScreen extends ConsumerWidget {
                   () => const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator()),
                   ),
-              error: (e, s) => SliverFillRemaining(child: Center(child: Text('Error: $e'))),
+              error: (e, s) {
+                log(e.toString());
+                log(s.toString());
+                return SliverFillRemaining(child: Center(child: Text('Error: $e')));
+              },
             ),
           ],
         ),

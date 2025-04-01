@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'market_screen.dart';
+import '../../../market/presentation/screens/market_screen.dart';
 import 'settings_screen.dart';
 import 'tabs/home_tab.dart';
 

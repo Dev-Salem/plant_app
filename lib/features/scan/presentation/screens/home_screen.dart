@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plant_app/features/market/presentation/screens/market_screen.dart';
 import 'settings_screen.dart';
 import 'tabs/home_tab.dart';
 
@@ -37,13 +38,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
-}
-class MarketScreen extends StatelessWidget {
-  const MarketScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
   }
 }

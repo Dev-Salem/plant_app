@@ -4,13 +4,13 @@ import 'package:plant_app/core/app_theme.dart';
 import 'package:plant_app/core/constants/routes.dart';
 import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:plant_app/features/market/presentation/screens/market_screen.dart';
+import 'package:plant_app/features/market/presentation/screens/product_details_screen.dart';
 import 'package:plant_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:plant_app/features/onboarding/screens/welcome_screen.dart';
 import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:plant_app/features/scan/presentation/screens/home_screen.dart';
 import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.dart';
-import 'features/market/presentation/screens/product_details_screen.dart';
-import 'features/market/presentation/screens/cart_screen.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -44,14 +44,13 @@ class MainApp extends ConsumerWidget {
                   (context) =>
                       PlantDetailsView(scanResult: settings.arguments as PlantScanResponse),
             );
-
+          case Routes.market:
+            return MaterialPageRoute(builder: (context) => const MarketScreen());
           case Routes.marketProduct:
             final productId = settings.arguments as String;
             return MaterialPageRoute(
               builder: (context) => ProductDetailsScreen(productId: productId),
             );
-          case Routes.marketCart:
-            return MaterialPageRoute(builder: (context) => const CartScreen());
 
           default:
             return null;

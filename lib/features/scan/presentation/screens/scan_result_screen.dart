@@ -1,21 +1,29 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/features/scan/data/scan_repository.dart';
+import 'package:plant_app/features/scan/domain/models/captured_image.dart';
 import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.dart';
 
 class ScanResultScreen extends ConsumerWidget {
+  final CapturedImage? capturedImage;
   final String? imagePath;
 
-  const ScanResultScreen({super.key, this.imagePath});
+  const ScanResultScreen({super.key, this.capturedImage, this.imagePath});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (imagePath == null) {
+    // Handle both CapturedImage and legacy String path
+    if (capturedImage == null && imagePath == null) {
       return _buildErrorScreen(context, "No image provided");
     }
 
-    final scanResultAsync = ref.watch(scanResultProvider.call(imagePath!));
+    final scanResultAsync =
+        capturedImage != null
+            ? ref.watch(scanResultWithImageProvider.call(capturedImage!))
+            : ref.watch(scanResultProvider.call(imagePath!));
 
     return scanResultAsync.when(
       loading:
@@ -38,7 +46,11 @@ class ScanResultScreen extends ConsumerWidget {
               ),
             ),
           ),
-      error: (error, stack) => _buildErrorScreen(context, error.toString()),
+      error: (error, stack) {
+        log(error.toString());
+        log(stack.toString());
+        return _buildErrorScreen(context, error.toString());
+      },
       data: (scanResult) => Scaffold(body: PlantDetailsView(scanResult: scanResult)),
     );
   }

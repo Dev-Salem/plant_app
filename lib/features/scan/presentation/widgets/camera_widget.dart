@@ -1,15 +1,17 @@
 import 'dart:developer';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:plant_app/core/utils/image_utils.dart';
+import 'package:plant_app/features/scan/domain/models/captured_image.dart';
 import 'package:plant_app/features/scan/presentation/screens/scan_result_screen.dart';
 
 class CameraWidget extends StatefulWidget {
-  final Function(String imagePath)? onImageCaptured;
+  final Function(CapturedImage capturedImage)? onImageCaptured;
 
   const CameraWidget({super.key, this.onImageCaptured});
 
@@ -22,7 +24,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   List<CameraDescription> _cameras = [];
   bool _isCameraInitialized = false;
   bool _isPermissionDenied = false;
-  String? _capturedImagePath;
+  CapturedImage? _capturedImage;
   bool _isCapturing = false;
   int _selectedCameraIndex = 0;
 
@@ -30,7 +32,13 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initializeCamera();
+    if (!kIsWeb) {
+      _initializeCamera();
+    } else {
+      setState(() {
+        _isCameraInitialized = true; // Skip camera initialization on web
+      });
+    }
   }
 
   @override
@@ -49,7 +57,9 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
     if (state == AppLifecycleState.inactive) {
       _controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      _initializeController(_selectedCameraIndex);
+      if (!kIsWeb) {
+        _initializeController(_selectedCameraIndex);
+      }
     }
   }
 
@@ -71,6 +81,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   }
 
   Future<bool> _checkCameraPermission() async {
+    if (kIsWeb) return true; // Skip permission check on web
     final status = await Permission.camera.request();
     return status.isGranted;
   }
@@ -98,6 +109,11 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   }
 
   Future<void> _takePicture() async {
+    if (kIsWeb) {
+      await _pickImageFromGallery(); // On web, we'll use the file picker instead
+      return;
+    }
+
     if (_controller == null || !_controller!.value.isInitialized || _isCapturing) {
       return;
     }
@@ -108,10 +124,19 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
 
     try {
       final XFile photo = await _controller!.takePicture();
+      final capturedImage = CapturedImage(
+        path: photo.path,
+        bytes: await photo.readAsBytes(),
+        name: 'camera_image_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
       setState(() {
-        _capturedImagePath = photo.path;
+        _capturedImage = capturedImage;
       });
-      widget.onImageCaptured?.call(photo.path);
+
+      if (widget.onImageCaptured != null) {
+        widget.onImageCaptured!.call(capturedImage);
+      }
     } catch (e) {
       debugPrint('Error taking picture: $e');
     } finally {
@@ -122,14 +147,20 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   }
 
   Future<void> _pickImageFromGallery() async {
-    final ImagePicker picker = ImagePicker();
     try {
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
+      final capturedImage = await ImageUtils.pickImage(
+        source: ImageSource.gallery,
+        quality: 80,
+      );
+
+      if (capturedImage != null) {
         setState(() {
-          _capturedImagePath = image.path;
+          _capturedImage = capturedImage;
         });
-        widget.onImageCaptured?.call(image.path);
+
+        if (widget.onImageCaptured != null) {
+          widget.onImageCaptured!.call(capturedImage);
+        }
       }
     } catch (e) {
       log('Error picking image: $e');
@@ -137,7 +168,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   }
 
   void _switchCamera() {
-    if (_cameras.length < 2) return;
+    if (_cameras.length < 2 || kIsWeb) return;
     final newIndex = _selectedCameraIndex == 0 ? 1 : 0;
     _initializeController(newIndex);
   }
@@ -162,6 +193,13 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () async {
+              if (kIsWeb) {
+                setState(() {
+                  _isPermissionDenied = false;
+                });
+                return;
+              }
+
               final result = await openAppSettings();
               if (result) {
                 if (!mounted) return;
@@ -187,7 +225,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
       return _buildPermissionDeniedWidget();
     }
 
-    if (!_isCameraInitialized) {
+    if (!_isCameraInitialized && !kIsWeb) {
       return const Center(child: CircularProgressIndicator(color: Colors.green));
     }
 
@@ -195,11 +233,11 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
       children: [
         Expanded(
           child:
-              _capturedImagePath != null
+              _capturedImage != null
                   ? Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.file(File(_capturedImagePath!), fit: BoxFit.cover),
+                      Image.memory(_capturedImage!.bytes, fit: BoxFit.cover),
                       Positioned(
                         bottom: 30,
                         left: 0,
@@ -210,7 +248,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                             ElevatedButton(
                               onPressed: () {
                                 setState(() {
-                                  _capturedImagePath = null;
+                                  _capturedImage = null;
                                 });
                               },
                               style: ElevatedButton.styleFrom(
@@ -246,6 +284,30 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                       ),
                     ],
                   )
+                  : kIsWeb
+                  ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.camera_alt, size: 100, color: Colors.grey[400]),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Camera preview is not available on web',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          onPressed: _pickImageFromGallery,
+                          icon: const Icon(Icons.upload_file),
+                          label: const Text('Upload an image'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
                   : ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: AspectRatio(
@@ -254,66 +316,69 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                     ),
                   ),
         ),
-        Container(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.flip_camera_ios),
-                color: Colors.white,
-                onPressed: _switchCamera,
-              ).animate().fade(duration: 300.ms).scale(delay: 200.ms),
+        if (!kIsWeb || _capturedImage != null)
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                if (!kIsWeb)
+                  IconButton(
+                    icon: const Icon(Icons.flip_camera_ios),
+                    color: Colors.white,
+                    onPressed: _switchCamera,
+                  ).animate().fade(duration: 300.ms).scale(delay: 200.ms),
 
-              IconButton(
-                icon: const Icon(Icons.photo_library),
-                color: Colors.white,
-                onPressed: _pickImageFromGallery,
-              ).animate().fade(duration: 300.ms).scale(delay: 150.ms),
+                IconButton(
+                  icon: const Icon(Icons.photo_library),
+                  color: Colors.white,
+                  onPressed: _pickImageFromGallery,
+                ).animate().fade(duration: 300.ms).scale(delay: 150.ms),
 
-              GestureDetector(
-                onTap: _takePicture,
-                child: Container(
-                  height: 70,
-                  width: 70,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 4),
-                    color: Colors.transparent,
-                  ),
-                  child: Center(
-                    child:
-                        _isCapturing
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
-                            ),
-                  ),
-                ),
-              ).animate().fade(duration: 300.ms).scale(delay: 100.ms),
+                if (!kIsWeb && _capturedImage == null)
+                  GestureDetector(
+                    onTap: _takePicture,
+                    child: Container(
+                      height: 70,
+                      width: 70,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 4),
+                        color: Colors.transparent,
+                      ),
+                      child: Center(
+                        child:
+                            _isCapturing
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                      ),
+                    ),
+                  ).animate().fade(duration: 300.ms).scale(delay: 100.ms),
 
-              IconButton(
-                icon: const Icon(Icons.close),
-                color: Colors.white,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ).animate().fade(duration: 300.ms).scale(delay: 200.ms),
-            ],
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  color: Colors.white,
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ).animate().fade(duration: 300.ms).scale(delay: 200.ms),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
 }
 
 class CameraScreen extends ConsumerWidget {
-  final Function(String imagePath)? onImageCaptured;
+  final Function(CapturedImage capturedImage)? onImageCaptured;
 
   const CameraScreen({super.key, this.onImageCaptured});
 
@@ -328,15 +393,18 @@ class CameraScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Take a photo of your plant', style: TextStyle(color: Colors.white)),
+        title: Text(
+          kIsWeb ? 'Upload a plant image' : 'Take a photo of your plant',
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
       body: SafeArea(
         child: CameraWidget(
-          onImageCaptured: (imagePath) {
+          onImageCaptured: (capturedImage) {
             if (onImageCaptured != null) {
-              onImageCaptured!(imagePath);
+              onImageCaptured!(capturedImage);
             } else {
-              _processCapturedImage(context, ref, imagePath);
+              _processCapturedImage(context, ref, capturedImage);
             }
           },
         ),
@@ -344,7 +412,11 @@ class CameraScreen extends ConsumerWidget {
     );
   }
 
-  void _processCapturedImage(BuildContext context, WidgetRef ref, String imagePath) {
+  void _processCapturedImage(
+    BuildContext context,
+    WidgetRef ref,
+    CapturedImage capturedImage,
+  ) {
     // Show loading dialog
     showDialog(
       context: context,
@@ -355,7 +427,7 @@ class CameraScreen extends ConsumerWidget {
     Navigator.pop(context); // Close dialog
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => ScanResultScreen(imagePath: imagePath)),
+      MaterialPageRoute(builder: (context) => ScanResultScreen(capturedImage: capturedImage)),
     );
   }
 }

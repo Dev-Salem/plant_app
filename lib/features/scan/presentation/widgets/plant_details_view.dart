@@ -285,6 +285,8 @@ class PlantDetailsView extends ConsumerWidget {
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
                                   color: Colors.grey[200],
+                                  width: double.infinity,
+
                                   child: const Icon(Icons.image_not_supported, size: 40),
                                 );
                               },

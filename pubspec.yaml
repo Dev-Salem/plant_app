@@ -34,6 +34,7 @@ dev_dependencies:
   envied_generator: ^1.1.1
   build_runner: ^2.4.15
   riverpod_generator: ^2.6.5
+  flutter_launcher_icons: ^0.14.3
 
 dependency_overrides:
   flutter_web_auth_2: 4.1.0 
@@ -42,3 +43,12 @@ flutter:
   uses-material-design: true
   assets:
   - assets/images/
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/images/icon.png"

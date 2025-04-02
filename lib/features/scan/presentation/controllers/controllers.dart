@@ -7,19 +7,17 @@ part 'controllers.g.dart';
 @riverpod
 class SavedScans extends _$SavedScans {
   @override
-  FutureOr<List<String>> build() async {
-    return [];
-  }
+  FutureOr<void> build() async {}
 
   Future<void> saveNewScan(PlantScanResponse scan, VoidCallback onSuccess) async {
     state = const AsyncLoading();
     final repository = ref.read(scanRepositoryProvider);
     state = await AsyncValue.guard(() async {
       await repository.saveAccessToken(scan.accessToken);
-      return [...?state.value, scan.accessToken];
     });
     if (!state.hasError) {
       onSuccess();
+      ref.invalidate(plantDetectionsProvider);
     }
   }
 
@@ -28,7 +26,6 @@ class SavedScans extends _$SavedScans {
     final repository = ref.read(scanRepositoryProvider);
     state = await AsyncValue.guard(() async {
       repository.deleteAccessToken(token);
-     return state.value?.where((element) => element != token).toList()?? [];
     });
   }
 }

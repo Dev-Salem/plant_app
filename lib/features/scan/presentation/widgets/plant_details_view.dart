@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:plant_app/features/scan/data/scan_repository.dart';
 import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/features/scan/presentation/controllers/controllers.dart';
@@ -388,9 +387,7 @@ class PlantDetailsView extends ConsumerWidget {
               isLoading
                   ? null
                   : () {
-                    ref.read(savedScansProvider.notifier).saveNewScan(scanResult, () async {
-                      ref.invalidate(plantDetectionsProvider);
-                      await ref.read(plantDetectionsProvider.future);
+                    ref.read(savedScansProvider.notifier).saveNewScan(scanResult, () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Scan saved successfully!')),
                       );
@@ -470,27 +467,7 @@ class PlantDetailsView extends ConsumerWidget {
     return "Unknown";
   }
 
-  bool _isHealthy() {
-    // Check if plant has been identified as healthy using PlantStatus
-    if (scanResult.result.disease.suggestions.isNotEmpty) {
-      final suggestion = scanResult.result.disease.suggestions.first;
-      return suggestion.name.toLowerCase() == "healthy" &&
-          suggestion.probability > scanResult.result.isPlant.threshold;
-    }
-    return false;
-  }
 
-  double _getHealthScore() {
-    if (!_isHealthy() && scanResult.result.disease.suggestions.isNotEmpty) {
-      // If unhealthy, base health score on inverse of disease probability
-      // and consider the plant status threshold
-      final diseaseProb = scanResult.result.disease.suggestions.first.probability;
-      final threshold = scanResult.result.isPlant.threshold;
-      return 1.0 - (diseaseProb * (1 - threshold));
-    }
-    // If healthy, use plant status probability
-    return scanResult.result.isPlant.probability;
-  }
 
   double _getTopConfidence() {
     if (scanResult.result.crop.suggestions.isNotEmpty) {
@@ -505,12 +482,6 @@ class PlantDetailsView extends ConsumerWidget {
   Color _getConfidenceColor(double confidence) {
     if (confidence >= 0.8) return Colors.green;
     if (confidence >= 0.5) return Colors.orange;
-    return Colors.red;
-  }
-
-  Color _getHealthColor(double healthScore) {
-    if (healthScore >= 0.8) return Colors.green;
-    if (healthScore >= 0.5) return Colors.orange;
     return Colors.red;
   }
 

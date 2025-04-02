@@ -53,7 +53,6 @@ class OrderListItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dateFormat = DateFormat('MMM dd, yyyy');
-    final timeFormat = DateFormat('h:mm a');
     final currencyFormat = NumberFormat.currency(symbol: '\$');
 
     Color statusColor;

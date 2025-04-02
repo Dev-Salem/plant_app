@@ -6,7 +6,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:plant_app/features/scan/data/scan_repository.dart';
 import 'package:plant_app/features/scan/presentation/screens/scan_result_screen.dart';
 
 class CameraWidget extends StatefulWidget {
@@ -165,6 +164,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
             onPressed: () async {
               final result = await openAppSettings();
               if (result) {
+                if (!mounted) return;
                 Navigator.pop(context);
               }
             },
@@ -355,19 +355,7 @@ class CameraScreen extends ConsumerWidget {
     Navigator.pop(context); // Close dialog
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) =>  ScanResultScreen(imagePath: imagePath)),
-    );
-  }
-
-  void _showErrorSnackBar(BuildContext context, String errorMessage) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error: $errorMessage'),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
+      MaterialPageRoute(builder: (context) => ScanResultScreen(imagePath: imagePath)),
     );
   }
 }

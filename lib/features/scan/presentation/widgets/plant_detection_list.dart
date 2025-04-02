@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/features/scan/data/scan_repository.dart';
@@ -17,11 +15,10 @@ class PlantDetectionList extends ConsumerWidget {
 
     return plantsAsync.when(
       data: (plants) {
-        log(plants.length.toString());
         if (plants.isEmpty) {
-          return _buildEmptyState();
+          return const EmptyPlantState();
         }
-        return _buildPlantsList(context, plants);
+        return PlantsList(plants: plants);
       },
       loading:
           () => const Center(
@@ -50,8 +47,13 @@ class PlantDetectionList extends ConsumerWidget {
           ),
     );
   }
+}
 
-  Widget _buildEmptyState() {
+class EmptyPlantState extends StatelessWidget {
+  const EmptyPlantState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       elevation: 0,
       color: Colors.grey[100],
@@ -79,12 +81,19 @@ class PlantDetectionList extends ConsumerWidget {
       ),
     ).animate().fade(duration: 400.ms, delay: 600.ms);
   }
+}
 
-  Widget _buildPlantsList(BuildContext context, List<PlantScanResponse> plants) {
+class PlantsList extends StatelessWidget {
+  final List<PlantScanResponse> plants;
+
+  const PlantsList({super.key, required this.plants});
+
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: plants.length, // Show only 3 recent items
+      itemCount: plants.length,
       itemBuilder: (context, index) {
         final plant = plants[index];
         return _buildPlantCard(context, plant, index);

@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:appwrite/models.dart';
 import 'package:equatable/equatable.dart';

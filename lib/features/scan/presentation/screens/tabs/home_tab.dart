@@ -211,19 +211,6 @@ class _HomeTabState extends State<HomeTab> {
                 const SizedBox(height: 14),
                 PlantDetectionList(),
                 const SizedBox(height: 32),
-                // Text(
-                //       'Disease Alerts',
-                //       style: TextStyle(
-                //         fontSize: 20,
-                //         fontWeight: FontWeight.bold,
-                //         color: Colors.grey[800],
-                //       ),
-                //     )
-                //     .animate()
-                //     .fade(duration: 500.ms, delay: 500.ms)
-                //     .slideX(begin: -0.1, end: 0, duration: 500.ms, delay: 500.ms),
-                // const SizedBox(height: 14),
-                // _buildDiseaseAlerts(),
               ],
             ),
           ),
@@ -232,47 +219,4 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // Widget _buildDiseaseAlerts() {
-  //   return Card(
-  //         elevation: 0,
-  //         color: const Color(0xFFFFF3E0),
-  //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  //         child: Padding(
-  //           padding: const EdgeInsets.all(20.0),
-  //           child: Row(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Container(
-  //                 padding: const EdgeInsets.all(10),
-  //                 decoration: BoxDecoration(
-  //                   color: Colors.orange.withOpacity(0.2),
-  //                   shape: BoxShape.circle,
-  //                 ),
-  //                 child: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-  //               ),
-  //               const SizedBox(width: 16),
-  //               Expanded(
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     const Text(
-  //                       'High risk of fungal infections',
-  //                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-  //                     ),
-  //                     const SizedBox(height: 8),
-  //                     Text(
-  //                       'Due to recent weather conditions in your area',
-  //                       style: TextStyle(color: Colors.grey[700]),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       )
-  //       .animate()
-  //       .fade(duration: 500.ms, delay: 800.ms)
-  //       .slideY(begin: 0.3, end: 0, duration: 500.ms, delay: 800.ms);
-  // }
 }

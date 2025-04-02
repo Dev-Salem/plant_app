@@ -55,13 +55,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       length: 2, // Updated to include Orders tab
       child: Column(
         children: [
-          Container(
-            child: const TabBar(
-              tabs: [Tab(text: 'Products'), Tab(text: 'Orders')],
-              labelColor: Color(0xFF2E7D32),
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Color(0xFF2E7D32),
-            ),
+          const TabBar(
+            tabs: [Tab(text: 'Products'), Tab(text: 'Orders')],
+            labelColor: Color(0xFF2E7D32),
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: Color(0xFF2E7D32),
           ),
           Expanded(
             child: TabBarView(

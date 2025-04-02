@@ -6,24 +6,21 @@ import 'package:plant_app/features/market/presentation/controllers/market_contro
 
 class OrderDetailsScreen extends ConsumerWidget {
   final String orderId;
-  
+
   const OrderDetailsScreen({super.key, required this.orderId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orderItemsAsync = ref.watch(orderItemsProvider(orderId));
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Order #${orderId.substring(0, 8)}'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: Text('Order #${orderId.substring(0, 8)}'), elevation: 0),
       body: orderItemsAsync.when(
         data: (orderItems) {
           if (orderItems.isEmpty) {
             return const Center(child: Text('No items found for this order'));
           }
-          
+
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -39,9 +36,9 @@ class OrderDetailsScreen extends ConsumerWidget {
                         children: [
                           Text(
                             'Order Summary',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 16),
                           OrderSummary(orderId: orderId, orderItems: orderItems),
@@ -49,17 +46,17 @@ class OrderDetailsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   Text(
                     'Order Items',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Order items list
                   ListView.builder(
                     shrinkWrap: true,
@@ -75,12 +72,13 @@ class OrderDetailsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(
-            'Error loading order details: ${error.toString()}',
-            textAlign: TextAlign.center,
-          ),
-        ),
+        error:
+            (error, stackTrace) => Center(
+              child: Text(
+                'Error loading order details: ${error.toString()}',
+                textAlign: TextAlign.center,
+              ),
+            ),
       ),
     );
   }
@@ -89,19 +87,19 @@ class OrderDetailsScreen extends ConsumerWidget {
 class OrderSummary extends ConsumerWidget {
   final String orderId;
   final List<OrderItem> orderItems;
-  
+
   const OrderSummary({super.key, required this.orderId, required this.orderItems});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersList = ref.watch(userOrdersProvider);
-    
+
     return ordersList.when(
       data: (orders) {
         final order = orders.firstWhere((o) => o.id == orderId);
         final formattedDate = DateFormat('MMMM dd, yyyy').format(order.dateTime);
         final formattedTime = DateFormat('h:mm a').format(order.dateTime);
-        
+
         return Column(
           children: [
             Row(
@@ -116,7 +114,7 @@ class OrderSummary extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             if (order.address != null && order.address!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
@@ -134,17 +132,14 @@ class OrderSummary extends ConsumerWidget {
                   ],
                 ),
               ),
-            
+
             const Divider(),
             const SizedBox(height: 8),
-            
-            SummaryItem(
-              title: 'Items', 
-              value: '${orderItems.length}',
-            ),
+
+            SummaryItem(title: 'Items', value: '${orderItems.length}'),
             const SizedBox(height: 4),
             SummaryItem(
-              title: 'Status', 
+              title: 'Status',
               value: order.status.toUpperCase(),
               valueColor: order.status == 'completed' ? Colors.green : Colors.orange,
             ),
@@ -170,15 +165,15 @@ class SummaryItem extends StatelessWidget {
   final String value;
   final Color? valueColor;
   final bool isTotal;
-  
+
   const SummaryItem({
-    super.key, 
-    required this.title, 
+    super.key,
+    required this.title,
     required this.value,
     this.valueColor,
     this.isTotal = false,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -188,9 +183,12 @@ class SummaryItem extends StatelessWidget {
         children: [
           Text(
             title,
-            style: isTotal 
-                ? Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)
-                : Theme.of(context).textTheme.bodyMedium,
+            style:
+                isTotal
+                    ? Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)
+                    : Theme.of(context).textTheme.bodyMedium,
           ),
           Text(
             value,
@@ -208,9 +206,9 @@ class SummaryItem extends StatelessWidget {
 
 class OrderItemCard extends StatelessWidget {
   final OrderItem orderItem;
-  
+
   const OrderItemCard({super.key, required this.orderItem});
-  
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -227,9 +225,9 @@ class OrderItemCard extends StatelessWidget {
                 children: [
                   Text(
                     orderItem.productName,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -247,9 +245,9 @@ class OrderItemCard extends StatelessWidget {
                       Text(
                         '\$${(orderItem.price * orderItem.quantity).toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ],
                   ),

@@ -103,6 +103,16 @@ class _CartItemsListState extends ConsumerState<_CartItemsList> {
         );
   }
 
+  // Add a function to update the quantity locally
+  void _updateQuantity(String cartItemId, int newQuantity) {
+    setState(() {
+      final index = _items.indexWhere((item) => item.id == cartItemId);
+      if (index != -1) {
+        _items[index] = _items[index].copyWith(quantity: newQuantity);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -114,6 +124,8 @@ class _CartItemsListState extends ConsumerState<_CartItemsList> {
               return CartItemCard(
                 cartItem: _items[index],
                 onDismissed: () => _removeItem(index, _items[index]),
+                onQuantityChanged:
+                    (newQuantity) => _updateQuantity(_items[index].id, newQuantity),
               );
             },
           ),
@@ -127,8 +139,14 @@ class _CartItemsListState extends ConsumerState<_CartItemsList> {
 class CartItemCard extends ConsumerWidget {
   final CartItem cartItem;
   final VoidCallback onDismissed;
+  final void Function(int) onQuantityChanged; // Add callback for quantity changes
 
-  const CartItemCard({super.key, required this.cartItem, required this.onDismissed});
+  const CartItemCard({
+    super.key,
+    required this.cartItem,
+    required this.onDismissed,
+    required this.onQuantityChanged, // Add this parameter
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -188,7 +206,10 @@ class CartItemCard extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    QuantitySelector(cartItem: cartItem),
+                    QuantitySelector(
+                      cartItem: cartItem,
+                      onQuantityChanged: onQuantityChanged, // Pass the callback
+                    ),
                   ],
                 ),
               ),
@@ -202,8 +223,13 @@ class CartItemCard extends ConsumerWidget {
 
 class QuantitySelector extends ConsumerWidget {
   final CartItem cartItem;
+  final void Function(int) onQuantityChanged; // Add callback
 
-  const QuantitySelector({super.key, required this.cartItem});
+  const QuantitySelector({
+    super.key,
+    required this.cartItem,
+    required this.onQuantityChanged, // Add this parameter
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -226,14 +252,14 @@ class QuantitySelector extends ConsumerWidget {
                     isLoading || cartItem.quantity <= 1
                         ? null
                         : () {
+                          // Update quantity locally first for immediate feedback
+                          final newQuantity = cartItem.quantity - 1;
+                          onQuantityChanged(newQuantity);
+
+                          // Then persist to backend
                           ref
                               .read(cartControllerProvider.notifier)
-                              .updateQuantity(
-                                cartItem.userId,
-                                cartItem.id,
-                                cartItem.quantity - 1,
-                                null,
-                              );
+                              .updateQuantity(cartItem.userId, cartItem.id, newQuantity, null);
                         },
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 padding: EdgeInsets.zero,
@@ -249,14 +275,14 @@ class QuantitySelector extends ConsumerWidget {
                     isLoading
                         ? null
                         : () {
+                          // Update quantity locally first for immediate feedback
+                          final newQuantity = cartItem.quantity + 1;
+                          onQuantityChanged(newQuantity);
+
+                          // Then persist to backend
                           ref
                               .read(cartControllerProvider.notifier)
-                              .updateQuantity(
-                                cartItem.userId,
-                                cartItem.id,
-                                cartItem.quantity + 1,
-                                null,
-                              );
+                              .updateQuantity(cartItem.userId, cartItem.id, newQuantity, null);
                         },
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 padding: EdgeInsets.zero,

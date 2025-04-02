@@ -13,10 +13,7 @@ class OrdersScreen extends ConsumerWidget {
     final ordersAsync = ref.watch(userOrdersProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Orders'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('My Orders'), elevation: 0),
       body: ordersAsync.when(
         data: (orders) {
           if (orders.isEmpty) {
@@ -49,12 +46,13 @@ class OrdersScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(
-            'Error loading orders: ${error.toString()}',
-            textAlign: TextAlign.center,
-          ),
-        ),
+        error:
+            (error, stackTrace) => Center(
+              child: Text(
+                'Error loading orders: ${error.toString()}',
+                textAlign: TextAlign.center,
+              ),
+            ),
       ),
     );
   }
@@ -69,15 +67,12 @@ class OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('MMMM dd, yyyy').format(order.dateTime);
     final formattedTime = DateFormat('h:mm a').format(order.dateTime);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () {
-          Navigator.of(context).pushNamed(
-            Routes.orderDetails,
-            arguments: order.id,
-          );
+          Navigator.of(context).pushNamed(Routes.orderDetails, arguments: order.id);
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -90,16 +85,17 @@ class OrderCard extends StatelessWidget {
                 children: [
                   Text(
                     'Order #${order.id.substring(0, 8)}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: order.status == 'completed' 
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.orange.withOpacity(0.1),
+                      color:
+                          order.status == 'completed'
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.orange.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -131,16 +127,13 @@ class OrderCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Total Amount', 
-                    style: Theme.of(context).textTheme.bodyLarge
-                  ),
+                  Text('Total Amount', style: Theme.of(context).textTheme.bodyLarge),
                   Text(
                     '\$${order.totalAmount.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ],
               ),
@@ -150,10 +143,9 @@ class OrderCard extends StatelessWidget {
                 children: [
                   TextButton.icon(
                     onPressed: () {
-                      Navigator.of(context).pushNamed(
-                        Routes.orderDetails,
-                        arguments: order.id,
-                      );
+                      Navigator.of(
+                        context,
+                      ).pushNamed(Routes.orderDetails, arguments: order.id);
                     },
                     icon: const Icon(Icons.arrow_forward, size: 16),
                     label: const Text('View Details'),

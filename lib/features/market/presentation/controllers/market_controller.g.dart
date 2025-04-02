@@ -456,7 +456,7 @@ final cartControllerProvider =
     );
 
 typedef _$CartController = AutoDisposeAsyncNotifier<void>;
-String _$orderControllerHash() => r'4fb0526b13644f13c95e534e0f29d1d5cbb40c3e';
+String _$orderControllerHash() => r'884f4055bb8a3b6e5a9ff6b546bb9a57f373af5f';
 
 /// See also [OrderController].
 @ProviderFor(OrderController)

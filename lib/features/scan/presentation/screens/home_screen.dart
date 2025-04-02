@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plant_app/features/admin/presentation/screens/dashboard_screen.dart';
 import 'package:plant_app/features/market/presentation/screens/market_screen.dart';
 import 'settings_screen.dart';
 import 'tabs/home_tab.dart';
@@ -18,7 +19,12 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  final List<Widget> _screens = [const HomeTab(), const MarketScreen(), SettingsScreen()];
+  final List<Widget> _screens = [
+    const HomeTab(),
+    const MarketScreen(),
+    DashboardScreen(),
+    SettingsScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Market'),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),

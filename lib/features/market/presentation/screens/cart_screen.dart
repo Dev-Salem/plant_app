@@ -63,8 +63,7 @@ class _CartItemsList extends ConsumerStatefulWidget {
 
 class _CartItemsListState extends ConsumerState<_CartItemsList> {
   late List<CartItem> _items;
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
+
 
   @override
   void initState() {
@@ -76,7 +75,6 @@ class _CartItemsListState extends ConsumerState<_CartItemsList> {
     // Store the item reference before removal
     final removedItem = item;
     final removedItemName = item.productName;
-    final removedItemIndex = index;
 
     // Remove the item from the local state first
     setState(() {

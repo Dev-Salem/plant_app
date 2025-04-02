@@ -439,7 +439,7 @@ class _OrderItemsProviderElement
   String get orderId => (origin as OrderItemsProvider).orderId;
 }
 
-String _$cartControllerHash() => r'670ee1ebe2059f5eb58e26801876ba702c61233e';
+String _$cartControllerHash() => r'ae2ba1005bba7afc431bb4d60352c81f8176c206';
 
 /// See also [CartController].
 @ProviderFor(CartController)
@@ -456,7 +456,7 @@ final cartControllerProvider =
     );
 
 typedef _$CartController = AutoDisposeAsyncNotifier<void>;
-String _$orderControllerHash() => r'314cc7298e5381f6362d4e826ad633ee9eb30784';
+String _$orderControllerHash() => r'4fb0526b13644f13c95e534e0f29d1d5cbb40c3e';
 
 /// See also [OrderController].
 @ProviderFor(OrderController)

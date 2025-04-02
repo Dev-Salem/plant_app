@@ -11,4 +11,5 @@ class Routes {
   static const String marketCart = '/market/cart';
   static const String marketOrders = '/market/orders';
   static const String marketCategory = '/market/category';
+  static const String orderDetails = '/market/orders/details';
 }

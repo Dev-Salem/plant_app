@@ -13,6 +13,8 @@ import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:plant_app/features/scan/presentation/screens/home_screen.dart';
 import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.dart';
 import 'package:plant_app/features/market/presentation/screens/cart_screen.dart';
+import 'package:plant_app/features/market/presentation/screens/orders_screen.dart';
+import 'package:plant_app/features/market/presentation/screens/order_details_screen.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -59,6 +61,13 @@ class MainApp extends ConsumerWidget {
             );
           case Routes.marketCart:
             return MaterialPageRoute(builder: (context) => const CartScreen());
+          case Routes.marketOrders:
+            return MaterialPageRoute(builder: (context) => const OrdersScreen());
+          case Routes.orderDetails:
+            final orderId = settings.arguments as String;
+            return MaterialPageRoute(
+              builder: (context) => OrderDetailsScreen(orderId: orderId),
+            );
 
           default:
             return null;

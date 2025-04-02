@@ -22,6 +22,12 @@ class MarketScreen extends ConsumerWidget {
               Navigator.of(context).pushNamed(Routes.marketCart);
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.store),
+            onPressed: () {
+              Navigator.of(context).pushNamed(Routes.marketOrders);
+            },
+          ),
         ],
       ),
       body: productsAsync.when(

@@ -19,7 +19,7 @@ class MarketScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
-              // Navigate to cart screen
+              Navigator.of(context).pushNamed(Routes.marketCart);
             },
           ),
         ],

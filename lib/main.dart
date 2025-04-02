@@ -1,3 +1,4 @@
+import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/core/app_theme.dart';
@@ -11,6 +12,7 @@ import 'package:plant_app/features/onboarding/screens/welcome_screen.dart';
 import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:plant_app/features/scan/presentation/screens/home_screen.dart';
 import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.dart';
+import 'package:plant_app/features/market/presentation/screens/cart_screen.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -23,8 +25,12 @@ class MainApp extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final authStatus = ref.watch(userProvider);
     return MaterialApp(
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: AppTheme.light.copyWith(
+        appBarTheme: context.appBarTheme.copyWith(centerTitle: true),
+      ),
+      darkTheme: AppTheme.dark.copyWith(
+        appBarTheme: context.appBarTheme.copyWith(centerTitle: true),
+      ),
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       onGenerateRoute: (settings) {
@@ -51,13 +57,15 @@ class MainApp extends ConsumerWidget {
             return MaterialPageRoute(
               builder: (context) => ProductDetailsScreen(productId: productId),
             );
+          case Routes.marketCart:
+            return MaterialPageRoute(builder: (context) => const CartScreen());
 
           default:
             return null;
         }
       },
       home: authStatus.when(
-        data: (user) => user!=null ? const HomeScreen() : const WelcomeScreen(),
+        data: (user) => user != null ? const HomeScreen() : const WelcomeScreen(),
         loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
         error:
             (error, stackTrace) => Scaffold(

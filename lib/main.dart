@@ -9,11 +9,8 @@ import 'package:plant_app/features/onboarding/screens/welcome_screen.dart';
 import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:plant_app/features/scan/presentation/screens/home_screen.dart';
 import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.dart';
-import 'features/market/presentation/screens/market_screen.dart';
 import 'features/market/presentation/screens/product_details_screen.dart';
 import 'features/market/presentation/screens/cart_screen.dart';
-import 'features/market/presentation/screens/orders_screen.dart';
-import 'features/market/presentation/screens/category_products_screen.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -47,8 +44,7 @@ class MainApp extends ConsumerWidget {
                   (context) =>
                       PlantDetailsView(scanResult: settings.arguments as PlantScanResponse),
             );
-          case Routes.market:
-            return MaterialPageRoute(builder: (context) => const MarketScreen());
+
           case Routes.marketProduct:
             final productId = settings.arguments as String;
             return MaterialPageRoute(
@@ -56,13 +52,7 @@ class MainApp extends ConsumerWidget {
             );
           case Routes.marketCart:
             return MaterialPageRoute(builder: (context) => const CartScreen());
-          case Routes.marketOrders:
-            return MaterialPageRoute(builder: (context) => const OrdersScreen());
-          case Routes.marketCategory:
-            final categoryId = settings.arguments as String;
-            return MaterialPageRoute(
-              builder: (context) => CategoryProductsScreen(categoryId: categoryId),
-            );
+
           default:
             return null;
         }

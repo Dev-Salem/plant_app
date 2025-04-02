@@ -5,6 +5,7 @@ import 'package:pinput/pinput.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/core/constants/routes.dart';
 import 'package:plant_app/core/errors/error_messages.dart';
+import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'dart:async';
 
@@ -68,6 +69,9 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
     if (pin.length == 6) {
       // Verify OTP with callback to navigate to home screen on success
       ref.read(authControllerProvider.notifier).verifyOtp(pin, () {
+        // First refresh the user provider to ensure it reflects updated auth state
+        ref.invalidate(userProvider);
+        // Then navigate to home screen
         Navigator.pushNamedAndRemoveUntil(context, Routes.home, (route) => false);
       });
     }

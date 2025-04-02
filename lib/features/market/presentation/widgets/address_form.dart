@@ -15,6 +15,7 @@ class _AddressFormState extends State<AddressForm> {
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
   final _zipController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   @override
   void dispose() {
@@ -22,6 +23,7 @@ class _AddressFormState extends State<AddressForm> {
     _cityController.dispose();
     _stateController.dispose();
     _zipController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -30,7 +32,8 @@ class _AddressFormState extends State<AddressForm> {
       final fullAddress =
           '${_streetController.text}, '
           '${_cityController.text}, '
-          '${_stateController.text} ${_zipController.text}';
+          '${_stateController.text} ${_zipController.text}, '
+          'Phone: ${_phoneController.text}';
 
       widget.onAddressSubmitted(fullAddress);
     }
@@ -117,6 +120,22 @@ class _AddressFormState extends State<AddressForm> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _phoneController,
+              decoration: const InputDecoration(
+                labelText: 'Phone Number',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.phone),
+              ),
+              keyboardType: TextInputType.phone,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your phone number';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 24),
             SizedBox(

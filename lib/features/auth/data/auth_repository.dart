@@ -63,6 +63,11 @@ class AuthRepository {
       return null;
     }
   }
+
+  Future<bool> isAdmin() async {
+    final user = await getAccount();
+    return user?.labels.first == 'admin';
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -87,4 +92,8 @@ final authStatusProvider = FutureProvider<bool>((ref) async {
 
 final userProvider = FutureProvider<User?>((ref) async {
   return ref.watch(authRepositoryProvider).getAccount();
+});
+
+final isAdminProvider = FutureProvider<bool>((ref) async {
+  return ref.watch(authRepositoryProvider).isAdmin();
 });

@@ -29,7 +29,7 @@ class MainApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.dark,
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case Routes.welcome:

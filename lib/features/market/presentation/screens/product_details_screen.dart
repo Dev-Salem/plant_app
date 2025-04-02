@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/market/data/appwrite_market_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities.dart';
@@ -170,9 +171,12 @@ class _QuantitySelector extends ConsumerStatefulWidget {
 
 class _QuantitySelectorState extends ConsumerState<_QuantitySelector> {
   int quantity = 1;
+  bool _isAdding = false;
 
   @override
   Widget build(BuildContext context) {
+    final cartState = ref.watch(cartNotifierProvider);
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -202,16 +206,53 @@ class _QuantitySelectorState extends ConsumerState<_QuantitySelector> {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {
-              ref.read(cartNotifierProvider.notifier).addToCart(widget.product, quantity);
-              Navigator.pop(context);
-            },
+            onPressed:
+                _isAdding
+                    ? null
+                    : () async {
+                      setState(() => _isAdding = true);
+
+                      try {
+                        // Add to cart using the new provider method
+                        // await addToCart(ref, widget.product, quantity);
+
+                        if (mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Added to cart'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isAdding = false);
+                        }
+                      }
+                    },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 48),
             ),
-            child: const Text('Add to Cart'),
+            child:
+                _isAdding
+                    ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                    : const Text('Add to Cart'),
           ),
         ],
       ),

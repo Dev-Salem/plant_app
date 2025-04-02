@@ -72,8 +72,6 @@ class Product extends Equatable {
   };
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    log('Parsing product JSON: $json');
-
     // Handle the case where we have categoryId instead of category object
     Map<String, dynamic> categoryJson;
     if (json['category'] == null && json['categoryId'] != null) {
@@ -354,21 +352,57 @@ class Cart extends Equatable {
   Map<String, dynamic> toJson() => {
     'id': id,
     'user_id': userId,
-    'items': items.map((i) => i.toJson()).toList(),
+    'items': items.map((i) => i.id).toList(), // Store just the IDs as the backend expects
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
   };
 
-  factory Cart.fromJson(Map<String, dynamic> json) => Cart(
-    id: json['id'] as String,
-    userId: json['user_id'] as String,
-    items:
-        (json['items'] as List<dynamic>)
-            .map((i) => CartItem.fromJson(i as Map<String, dynamic>))
-            .toList(),
-    createdAt: DateTime.parse(json['created_at'] as String),
-    updatedAt: DateTime.parse(json['updated_at'] as String),
-  );
+  factory Cart.fromJson(Map<String, dynamic> json) {
+    try {
+      // For cart response from backend, we need to parse differently since
+      // backend only stores IDs but we need to reconstruct CartItem objects
+      final List<dynamic> itemsJson = json['items'] as List<dynamic>;
+      final List<CartItem> parsedItems = [];
+
+      // Here we would normally look up each item by ID from a product repository
+      // For now, we'll create placeholder items
+      for (var itemId in itemsJson) {
+        // This is a simplified approach - in a real app, you'd fetch the product details
+        parsedItems.add(
+          CartItem(
+            id: itemId.toString(),
+            product: Product(
+              id: "placeholder",
+              name: "Item needs to be loaded",
+              description: "",
+              price: 0,
+              imageUrl: "",
+              stockQuantity: 0,
+              category: Category(
+                id: "unknown",
+                name: "Unknown",
+                description: "",
+                imageUrl: "",
+              ),
+            ),
+            quantity: 1,
+          ),
+        );
+      }
+
+      return Cart(
+        id: json['id'] as String,
+        userId: json['user_id'] as String,
+        items: parsedItems,
+        createdAt: DateTime.parse(json['created_at'] as String),
+        updatedAt: DateTime.parse(json['updated_at'] as String),
+      );
+    } catch (e) {
+      print('Error parsing Cart: $e');
+      print('Json data: $json');
+      rethrow;
+    }
+  }
 
   Cart copyWith({
     String? id,
@@ -410,11 +444,19 @@ class CartItem extends Equatable {
     'quantity': quantity,
   };
 
-  factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
-    id: json['id'] as String,
-    product: Product.fromJson(json['product'] as Map<String, dynamic>),
-    quantity: json['quantity'] as int,
-  );
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    try {
+      return CartItem(
+        id: json['id'] as String,
+        product: Product.fromJson(json['product'] as Map<String, dynamic>),
+        quantity: json['quantity'] as int,
+      );
+    } catch (e) {
+      print('Error parsing CartItem: $e');
+      print('Json data: $json');
+      rethrow;
+    }
+  }
 
   CartItem copyWith({String? id, Product? product, int? quantity}) {
     return CartItem(

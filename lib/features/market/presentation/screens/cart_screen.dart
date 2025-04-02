@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/features/market/presentation/controllers/cart_provider.dart';
 import 'package:plant_app/features/market/presentation/screens/order_confirmation_screen.dart';
 import 'package:plant_app/features/market/presentation/screens/shipping_address_form.dart';
 import '../../domain/entities.dart';
@@ -10,22 +11,34 @@ class CartScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cartAsync = ref.watch(cartNotifierProvider);
+    final cartAsync = ref.watch(userCartProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping Cart'),
         actions: [
-          if (cartAsync.valueOrNull?.items.isNotEmpty ?? false)
-            TextButton(
-              onPressed: () => ref.read(cartNotifierProvider.notifier).clearCart(),
-              child: const Text('Clear'),
-            ),
+          Consumer(
+            builder: (context, ref, _) {
+              final cartCount = ref.watch(cartItemCountProvider);
+              return cartCount.when(
+                data:
+                    (count) =>
+                        count > 0
+                            ? TextButton(
+                              onPressed: () => clearCart(ref),
+                              child: const Text('Clear'),
+                            )
+                            : const SizedBox.shrink(),
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
         ],
       ),
       body: cartAsync.when(
         data: (cart) {
-          if (cart == null || cart.items.isEmpty) {
+          if (cart.items.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -56,7 +69,25 @@ class CartScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error:
+            (error, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Error: $error'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => ref.refresh(userCartProvider),
+                      child: const Text('Try Again'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
       ),
     );
   }
@@ -96,18 +127,14 @@ class _CartItemTile extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.remove),
               onPressed: () {
-                ref
-                    .read(cartNotifierProvider.notifier)
-                    .updateItemQuantity(item.product, item.quantity - 1);
+                updateCartItemQuantity(ref, item.product.id, item.quantity - 1);
               },
             ),
             Text(item.quantity.toString()),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
-                ref
-                    .read(cartNotifierProvider.notifier)
-                    .updateItemQuantity(item.product, item.quantity + 1);
+                updateCartItemQuantity(ref, item.product.id, item.quantity + 1);
               },
             ),
           ],

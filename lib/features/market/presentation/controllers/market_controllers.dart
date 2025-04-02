@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show VoidCallback;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 import '../../data/appwrite_market_repository.dart';
 import '../../domain/entities.dart';
 
@@ -65,7 +66,22 @@ class CartNotifier extends _$CartNotifier {
   Future<void> loadCart(String userId) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      return ref.read(marketRepositoryProvider).getCart(userId);
+      try {
+        final cart = await ref.read(marketRepositoryProvider).getCart(userId);
+        return cart;
+      } catch (e) {
+        // Log the error for debugging
+        print('Error loading cart: $e');
+        // Create a new cart if loading fails
+        final newCart = Cart(
+          id: Uuid().v4(),
+          userId: userId,
+          items: [],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        return await ref.read(marketRepositoryProvider).createCart(newCart);
+      }
     });
   }
 
@@ -79,38 +95,47 @@ class CartNotifier extends _$CartNotifier {
   Future<void> addToCart(Product product, int quantity) async {
     if (state.value == null) return;
 
-    final cart = state.value!;
-    final existingItem = cart.items.firstWhere(
-      (item) => item.product.id == product.id,
-      orElse:
-          () => CartItem(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
+    // Start loading state
+    state = AsyncValue.loading();
+
+    try {
+      final cart = state.value!;
+      final existingItemIndex = cart.items.indexWhere((item) => item.product.id == product.id);
+
+      final updatedItems = [...cart.items];
+      if (existingItemIndex == -1) {
+        // Add new item
+        updatedItems.add(
+          CartItem(
+            id: product.id, // Use product ID as item ID for simplicity
             product: product,
-            quantity: 0,
+            quantity: quantity,
           ),
-    );
+        );
+      } else {
+        // Update existing item
+        final existingItem = updatedItems[existingItemIndex];
+        updatedItems[existingItemIndex] = CartItem(
+          id: existingItem.id,
+          product: product,
+          quantity: existingItem.quantity + quantity,
+        );
+      }
 
-    final updatedItems = [...cart.items];
-    if (existingItem.quantity == 0) {
-      updatedItems.add(CartItem(id: existingItem.id, product: product, quantity: quantity));
-    } else {
-      final index = updatedItems.indexOf(existingItem);
-      updatedItems[index] = CartItem(
-        id: existingItem.id,
-        product: product,
-        quantity: existingItem.quantity + quantity,
+      final updatedCart = Cart(
+        id: cart.id,
+        userId: cart.userId,
+        items: updatedItems,
+        createdAt: cart.createdAt,
+        updatedAt: DateTime.now(),
       );
+
+      final result = await ref.read(marketRepositoryProvider).updateCart(updatedCart);
+      state = AsyncValue.data(result);
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+      print('Error adding to cart: $e');
     }
-
-    final updatedCart = Cart(
-      id: cart.id,
-      userId: cart.userId,
-      items: updatedItems,
-      createdAt: cart.createdAt,
-      updatedAt: DateTime.now(),
-    );
-
-    await updateCart(updatedCart);
   }
 
   Future<void> clearCart() async {
@@ -145,6 +170,29 @@ class CartNotifier extends _$CartNotifier {
 
       await updateCart(updatedCart);
     }
+  }
+
+  Future<void> createNewCart(String userId) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final newCart = Cart(
+        id: Uuid().v4(),
+        userId: userId,
+        items: [],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      return ref.read(marketRepositoryProvider).createCart(newCart);
+    });
+  }
+
+  Future<void> addItemToCart(CartItem item) async {
+    if (state.value == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(marketRepositoryProvider).addCartItem(state.value!.id, item);
+      return ref.read(marketRepositoryProvider).getCart(state.value!.userId);
+    });
   }
 }
 

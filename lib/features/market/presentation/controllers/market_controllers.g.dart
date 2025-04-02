@@ -38,7 +38,7 @@ final categoriesProvider =
     );
 
 typedef _$Categories = AutoDisposeAsyncNotifier<List<Category>>;
-String _$cartNotifierHash() => r'525ed76d26dfaf532aab11a80a9f354bba47b2f6';
+String _$cartNotifierHash() => r'1ee40c6e499468c7b2a3c0df6ae712444fe5b759';
 
 /// See also [CartNotifier].
 @ProviderFor(CartNotifier)

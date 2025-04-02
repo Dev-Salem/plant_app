@@ -29,12 +29,10 @@ class AppwriteMarketRepository implements MarketRepository {
       databaseId: _databaseId,
       collectionId: _productsCollection,
     );
-    log('Raw products data: ${result.documents.map((doc) => doc.data)}');
     return result.documents.map((doc) {
       try {
         return Product.fromJson(doc.data);
       } catch (e, stackTrace) {
-        log('Error parsing product: ${doc.data}', error: e, stackTrace: stackTrace);
         rethrow;
       }
     }).toList();
@@ -47,11 +45,9 @@ class AppwriteMarketRepository implements MarketRepository {
       collectionId: _productsCollection,
       documentId: id,
     );
-    log('Raw product data: ${doc.data}');
     try {
       return Product.fromJson(doc.data);
     } catch (e, stackTrace) {
-      log('Error parsing product: ${doc.data}', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -89,13 +85,68 @@ class AppwriteMarketRepository implements MarketRepository {
 
   @override
   Future<Cart> getCart(String userId) async {
-    final result = await _databases.listDocuments(
-      databaseId: _databaseId,
-      collectionId: _cartsCollection,
-      queries: [Query.equal('user_id', userId)],
-    );
+    try {
+      log('Fetching cart for user: $userId');
+      final result = await _databases.listDocuments(
+        databaseId: _databaseId,
+        collectionId: _cartsCollection,
+        queries: [Query.equal('user_id', userId)],
+      );
 
-    if (result.documents.isEmpty) {
+      if (result.documents.isEmpty) {
+        log('No existing cart found. Creating new cart for user: $userId');
+        return await _createNewCart(userId);
+      }
+
+      log('Found existing cart: ${result.documents.first.data}');
+      final cartData = result.documents.first.data;
+
+      // We need to load product details for each item ID in the cart
+      final List<dynamic> itemIds = cartData['items'] as List<dynamic>? ?? [];
+      final List<CartItem> resolvedItems = [];
+
+      for (var itemId in itemIds) {
+        try {
+          // Fetch product details for each item
+          final product = await getProductById(itemId.toString());
+
+          resolvedItems.add(
+            CartItem(
+              id: itemId.toString(),
+              product: product,
+              quantity: 1, // Default quantity - you'd need to store this properly
+            ),
+          );
+        } catch (e) {
+          log('Error fetching product $itemId: $e');
+          // Skip this item if it can't be loaded
+        }
+      }
+
+      // Return cart with resolved items
+      return Cart(
+        id: cartData['id'] as String,
+        userId: cartData['user_id'] as String,
+        items: resolvedItems,
+        createdAt: DateTime.parse(cartData['created_at'] as String),
+        updatedAt: DateTime.parse(cartData['updated_at'] as String),
+      );
+    } catch (e, stackTrace) {
+      log('Error getting cart for user $userId', error: e, stackTrace: stackTrace);
+
+      // If there's any error (like document not found), create a new cart
+      if (e.toString().contains('document_not_found')) {
+        log('Cart not found, creating new cart for user: $userId');
+        return await _createNewCart(userId);
+      }
+
+      rethrow;
+    }
+  }
+
+  // Helper method to create a new cart
+  Future<Cart> _createNewCart(String userId) async {
+    try {
       final newCart = Cart(
         id: ID.unique(),
         userId: userId,
@@ -104,28 +155,59 @@ class AppwriteMarketRepository implements MarketRepository {
         updatedAt: DateTime.now(),
       );
 
+      log('Creating new cart with data: ${newCart.toJson()}');
+
       final doc = await _databases.createDocument(
         databaseId: _databaseId,
         collectionId: _cartsCollection,
         documentId: newCart.id,
-        data: newCart.toJson(),
+        data: {
+          'id': newCart.id,
+          'user_id': newCart.userId,
+          'items': [], // Empty array for new cart
+          'created_at': newCart.createdAt.toIso8601String(),
+          'updated_at': newCart.updatedAt.toIso8601String(),
+        },
       );
-      return Cart.fromJson(doc.data);
-    }
 
-    return Cart.fromJson(result.documents.first.data);
+      log('New cart created successfully: ${doc.data}');
+      return newCart; // Return the cart object since it doesn't have items to resolve
+    } catch (e, stackTrace) {
+      log('Failed to create new cart: $e', error: e, stackTrace: stackTrace);
+      throw Exception('Failed to create cart: $e');
+    }
   }
 
   @override
   Future<bool> clearCart(String userId) async {
-    final cart = await getCart(userId);
-    await _databases.updateDocument(
-      databaseId: _databaseId,
-      collectionId: _cartsCollection,
-      documentId: cart.id,
-      data: {'items': []},
-    );
-    return true;
+    try {
+      // Try to find the cart first
+      final result = await _databases.listDocuments(
+        databaseId: _databaseId,
+        collectionId: _cartsCollection,
+        queries: [Query.equal('user_id', userId)],
+      );
+
+      if (result.documents.isEmpty) {
+        // No cart to clear
+        log('No cart found to clear for user: $userId');
+        return true;
+      }
+
+      final cartId = result.documents.first.data['id'] as String;
+
+      await _databases.updateDocument(
+        databaseId: _databaseId,
+        collectionId: _cartsCollection,
+        documentId: cartId,
+        data: {'items': []},
+      );
+      log('Cart cleared successfully for user: $userId');
+      return true;
+    } catch (e, stackTrace) {
+      log('Error clearing cart for user $userId', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
   }
 
   @override
@@ -242,13 +324,43 @@ class AppwriteMarketRepository implements MarketRepository {
 
   @override
   Future<Cart> updateCart(Cart cart) async {
-    final doc = await _databases.updateDocument(
-      databaseId: _databaseId,
-      collectionId: _cartsCollection,
-      documentId: cart.id,
-      data: cart.toJson(),
-    );
-    return Cart.fromJson(doc.data);
+    try {
+      log('Updating cart ${cart.id} with ${cart.items.length} items');
+
+      // Ensure items are mapped to just IDs for the database
+      final cartData = {
+        'user_id': cart.userId,
+        'items': cart.items.map((item) => item.product.id).toList(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      log('Cart JSON data to be sent: $cartData');
+
+      final doc = await _databases.updateDocument(
+        databaseId: _databaseId,
+        collectionId: _cartsCollection,
+        documentId: cart.id,
+        data: cartData,
+      );
+
+      log('Cart updated successfully');
+
+      // Return the updated cart with full details
+      return cart;
+    } catch (e, stackTrace) {
+      log('Error updating cart ${cart.id}', error: e, stackTrace: stackTrace);
+
+      // If the cart doesn't exist, create it
+      if (e.toString().contains('document_not_found')) {
+        log('Cart not found during update, creating a new one');
+        final newCart = await _createNewCart(cart.userId);
+
+        // Then try the update again with the new cart ID
+        return updateCart(cart.copyWith(id: newCart.id));
+      }
+
+      rethrow;
+    }
   }
 
   @override
@@ -282,6 +394,32 @@ class AppwriteMarketRepository implements MarketRepository {
       data: product.toJson(),
     );
     return Product.fromJson(doc.data);
+  }
+
+  @override
+  Future<Cart> createCart(Cart cart) async {
+    final doc = await _databases.createDocument(
+      databaseId: _databaseId,
+      collectionId: _cartsCollection,
+      documentId: cart.id,
+      data: cart.toJson(),
+    );
+    return Cart.fromJson(doc.data);
+  }
+
+  @override
+  Future<CartItem> addCartItem(String cartId, CartItem item) async {
+    final cart = await getCart(cartId);
+    final updatedItems = [...cart.items, item];
+
+    final doc = await _databases.updateDocument(
+      databaseId: _databaseId,
+      collectionId: _cartsCollection,
+      documentId: cartId,
+      data: {'items': updatedItems.map((i) => i.toJson()).toList()},
+    );
+
+    return CartItem.fromJson(doc.data['items'].last);
   }
 }
 

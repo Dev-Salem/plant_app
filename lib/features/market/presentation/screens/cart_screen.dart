@@ -35,19 +35,8 @@ class CartScreen extends ConsumerWidget {
             );
           }
 
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: cartItems.length,
-                  itemBuilder: (context, index) {
-                    return CartItemCard(cartItem: cartItems[index]);
-                  },
-                ),
-              ),
-              CartSummary(cartItems: cartItems),
-            ],
-          );
+          // Use a StatefulBuilder to manage local cart state for smooth UI updates
+          return _CartItemsList(initialItems: cartItems);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error:
@@ -62,10 +51,84 @@ class CartScreen extends ConsumerWidget {
   }
 }
 
+// New stateful widget to manage cart items locally
+class _CartItemsList extends ConsumerStatefulWidget {
+  final List<CartItem> initialItems;
+
+  const _CartItemsList({required this.initialItems});
+
+  @override
+  _CartItemsListState createState() => _CartItemsListState();
+}
+
+class _CartItemsListState extends ConsumerState<_CartItemsList> {
+  late List<CartItem> _items;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _items = List.from(widget.initialItems);
+  }
+
+  void _removeItem(int index, CartItem item) {
+    // Store the item reference before removal
+    final removedItem = item;
+    final removedItemName = item.productName;
+    final removedItemIndex = index;
+
+    // Remove the item from the local state first
+    setState(() {
+      _items.removeAt(index);
+    });
+
+    // Show the snackbar immediately
+    final snackBar = SnackBar(
+      content: Text('$removedItemName removed from cart'),
+      duration: const Duration(seconds: 2),
+    );
+
+    // Use the current context's ScaffoldMessenger
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    // Now trigger the actual database operation
+    ref
+        .read(cartControllerProvider.notifier)
+        .removeFromCart(
+          removedItem.userId,
+          removedItem.id,
+          null, // No callback needed since we already showed snackbar
+          removedItem: removedItem,
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: _items.length,
+            itemBuilder: (context, index) {
+              return CartItemCard(
+                cartItem: _items[index],
+                onDismissed: () => _removeItem(index, _items[index]),
+              );
+            },
+          ),
+        ),
+        CartSummary(cartItems: _items),
+      ],
+    );
+  }
+}
+
 class CartItemCard extends ConsumerWidget {
   final CartItem cartItem;
+  final VoidCallback onDismissed;
 
-  const CartItemCard({super.key, required this.cartItem});
+  const CartItemCard({super.key, required this.cartItem, required this.onDismissed});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,24 +142,9 @@ class CartItemCard extends ConsumerWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       onDismissed: (_) {
-        ref.read(cartControllerProvider.notifier).removeFromCart(
-          cartItem.userId,
-          cartItem.id,
-          () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${cartItem.productName} removed from cart'),
-                duration: const Duration(seconds: 2),
-                action: SnackBarAction(
-                  label: 'UNDO',
-                  onPressed: () {
-                    
-                  },
-                ),
-              ),
-            );
-          },
-        );
+        // Only call the parent's onDismissed callback
+        // which will handle both UI update and database operation
+        onDismissed();
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -42,14 +42,12 @@ Future<List<OrderItem>> orderItems(Ref ref, String orderId) {
 
 @riverpod
 class CartController extends _$CartController {
+  CartItem? _lastRemovedCartItem;
+
   @override
   FutureOr<void> build() async {}
 
-  Future<void> addToCart(
-    Product product,
-    int quantity,
-    VoidCallback? onSuccess,
-  ) async {
+  Future<void> addToCart(Product product, int quantity, VoidCallback? onSuccess) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(marketRepositoryProvider).addToCart(product, quantity);
@@ -64,14 +62,48 @@ class CartController extends _$CartController {
   Future<void> removeFromCart(
     String userId,
     String cartItemId,
-    VoidCallback? onSuccess,
-  ) async {
+    VoidCallback? onSuccess, {
+    CartItem? removedItem,
+  }) async {
     state = const AsyncLoading();
+
+    // Store the item for possible undo
+    if (removedItem != null) {
+      _lastRemovedCartItem = removedItem;
+    }
+
     state = await AsyncValue.guard(() async {
       await ref.read(marketRepositoryProvider).removeFromCart(cartItemId);
       // Invalidate cart items provider to refresh UI
       ref.invalidate(cartItemsProvider);
     });
+    if (!state.hasError && onSuccess != null) {
+      onSuccess();
+    }
+  }
+
+  Future<void> undoRemove(VoidCallback? onSuccess) async {
+    if (_lastRemovedCartItem == null) return;
+
+    final item = _lastRemovedCartItem!;
+    _lastRemovedCartItem = null;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      // Use the repository to add the product back to cart
+      final product = Product(
+        id: item.productId,
+        name: item.productName,
+        price: item.price,
+        imageUrl: item.imageUrl,
+        description: '', // Default description as we don't have it in CartItem
+      );
+
+      await ref.read(marketRepositoryProvider).addToCart(product, item.quantity);
+      // Invalidate cart items provider to refresh UI
+      ref.invalidate(cartItemsProvider);
+    });
+
     if (!state.hasError && onSuccess != null) {
       onSuccess();
     }

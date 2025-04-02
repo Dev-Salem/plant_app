@@ -9,16 +9,19 @@ part 'appwrite_market_repository.g.dart';
 class AppwriteMarketRepository implements IMarketplaceService {
   final Databases _databases;
   final String _databaseId;
-
+  final String userId;
   // Collection IDs
   static const String _productsCollection = 'products';
   static const String _ordersCollection = 'orders';
   static const String _orderItemsCollection = 'order_items';
   static const String _cartItemsCollection = 'cart_items';
 
-  AppwriteMarketRepository({required Databases databases, required String databaseId})
-    : _databases = databases,
-      _databaseId = databaseId;
+  AppwriteMarketRepository({
+    required Databases databases,
+    required String databaseId,
+    required this.userId,
+  }) : _databases = databases,
+       _databaseId = databaseId;
 
   @override
   Future<List<Product>> getProducts() async {
@@ -53,7 +56,7 @@ class AppwriteMarketRepository implements IMarketplaceService {
   }
 
   @override
-  Future<List<CartItem>> getCart(String userId) async {
+  Future<List<CartItem>> getCart() async {
     final response = await _databases.listDocuments(
       databaseId: _databaseId,
       collectionId: _cartItemsCollection,
@@ -64,7 +67,7 @@ class AppwriteMarketRepository implements IMarketplaceService {
   }
 
   @override
-  Future<void> addToCart(String userId, Product product, int quantity) async {
+  Future<void> addToCart(Product product, int quantity) async {
     // Check if product already in cart
     final existing = await _databases.listDocuments(
       databaseId: _databaseId,
@@ -119,15 +122,15 @@ class AppwriteMarketRepository implements IMarketplaceService {
   }
 
   @override
-  Future<void> clearCart(String userId) async {
-    final cartItems = await getCart(userId);
+  Future<void> clearCart() async {
+    final cartItems = await getCart();
     for (var item in cartItems) {
       await removeFromCart(item.id);
     }
   }
 
   @override
-  Future<Order> placeOrder(String userId, List<CartItem> cartItems, String? address) async {
+  Future<Order> placeOrder(List<CartItem> cartItems, String? address) async {
     // Calculate total amount
     double totalAmount = 0;
     for (var item in cartItems) {
@@ -166,13 +169,13 @@ class AppwriteMarketRepository implements IMarketplaceService {
     }
 
     // Clear the cart
-    await clearCart(userId);
+    await clearCart();
 
     return Order.fromDoc(order);
   }
 
   @override
-  Future<List<Order>> getUserOrders(String userId) async {
+  Future<List<Order>> getUserOrders() async {
     final response = await _databases.listDocuments(
       databaseId: _databaseId,
       collectionId: _ordersCollection,
@@ -198,5 +201,10 @@ class AppwriteMarketRepository implements IMarketplaceService {
 AppwriteMarketRepository marketRepository(Ref ref) {
   final database = Databases(ref.watch(appwriteClientProvider));
   final databaseId = "planty-db-id";
-  return AppwriteMarketRepository(databases: database, databaseId: databaseId);
+  final user = ref.watch(userProvider).value;
+  return AppwriteMarketRepository(
+    databases: database,
+    databaseId: databaseId,
+    userId: user?.$id ?? '',
+  );
 }

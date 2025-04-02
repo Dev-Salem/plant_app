@@ -41,6 +41,9 @@ class ProductDetailsScreen extends ConsumerWidget {
   }
 
   Widget _buildProductDetails(BuildContext context, WidgetRef ref, Product product) {
+    // Watch the cart controller state to show loading indicator
+    final cartControllerState = ref.watch(cartControllerProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -119,14 +122,32 @@ class ProductDetailsScreen extends ConsumerWidget {
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: () {
-              // Add to cart functionality
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('${product.name} added to cart')));
-            },
-            icon: const Icon(Icons.shopping_cart),
-            label: const Text('Add to Cart'),
+            onPressed:
+                cartControllerState.isLoading
+                    ? null // Disable button while loading
+                    : () {
+                      // Add to cart using the CartController
+                      ref.read(cartControllerProvider.notifier).addToCart(product, 1, () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Added to cart!'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      });
+                    },
+            icon:
+                cartControllerState.isLoading
+                    ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    )
+                    : const Icon(Icons.shopping_cart),
+            label: Text(cartControllerState.isLoading ? 'Adding...' : 'Add to Cart'),
           ).paddingHorizontal(24),
         ),
       ],

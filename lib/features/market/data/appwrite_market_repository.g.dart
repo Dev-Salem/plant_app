@@ -6,7 +6,7 @@ part of 'appwrite_market_repository.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$marketRepositoryHash() => r'6ad0ea6a730fa668e2bed5bd6e367821d4a07cb2';
+String _$marketRepositoryHash() => r'12288a9244a2111a3800a97f1a5a224a9216e1c6';
 
 /// See also [marketRepository].
 @ProviderFor(marketRepository)

@@ -7,19 +7,19 @@ abstract class IMarketplaceService {
 
   Future<Product> getProduct(String productId);
 
-  Future<List<CartItem>> getCart(String userId);
+  Future<List<CartItem>> getCart();
 
-  Future<void> addToCart(String userId, Product product, int quantity);
+  Future<void> addToCart(Product product, int quantity);
 
   Future<void> removeFromCart(String cartItemId);
 
   Future<void> updateQuantity(String cartItemId, int quantity);
 
-  Future<void> clearCart(String userId);
+  Future<void> clearCart();
 
-  Future<Order> placeOrder(String userId, List<CartItem> cartItems, String? address);
+  Future<Order> placeOrder(List<CartItem> cartItems, String? address);
 
-  Future<List<Order>> getUserOrders(String userId);
+  Future<List<Order>> getUserOrders();
 
   Future<List<OrderItem>> getOrderItems(String orderId);
 }

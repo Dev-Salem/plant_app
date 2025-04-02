@@ -84,3 +84,7 @@ Client appwriteClient(Ref ref) {
 final authStatusProvider = FutureProvider<bool>((ref) async {
   return ref.watch(authRepositoryProvider).isLoggedIn();
 });
+
+final userProvider = FutureProvider<User?>((ref) async {
+  return ref.watch(authRepositoryProvider).getAccount();
+});

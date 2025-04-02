@@ -21,7 +21,7 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final authStatus = ref.watch(authStatusProvider);
+    final authStatus = ref.watch(userProvider);
     return MaterialApp(
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
@@ -57,7 +57,7 @@ class MainApp extends ConsumerWidget {
         }
       },
       home: authStatus.when(
-        data: (isLoggedIn) => isLoggedIn ? const HomeScreen() : const WelcomeScreen(),
+        data: (user) => user!=null ? const HomeScreen() : const WelcomeScreen(),
         loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
         error:
             (error, stackTrace) => Scaffold(

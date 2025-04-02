@@ -6,7 +6,7 @@ part of 'market_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$productsHash() => r'8c28018c15ad13f10a4c6f6c01b3ac7e8823bcee';
+String _$productsHash() => r'9d3d965baf823ed424a2d646e5315f8f6a4d0de8';
 
 /// See also [products].
 @ProviderFor(products)
@@ -23,7 +23,7 @@ final productsProvider = AutoDisposeFutureProvider<List<Product>>.internal(
 // ignore: unused_element
 typedef ProductsRef = AutoDisposeFutureProviderRef<List<Product>>;
 String _$productsByCategoryHash() =>
-    r'b672faca33fb2e5e07690143b018649fcec5e9bc';
+    r'6d498529f05fa0479867c384e1d09b057b5d17f8';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -166,7 +166,7 @@ class _ProductsByCategoryProviderElement
   String get category => (origin as ProductsByCategoryProvider).category;
 }
 
-String _$productDetailsHash() => r'4960605a6ce9cd7124ed7d6b9226c252db7e9c42';
+String _$productDetailsHash() => r'b10ef3e0b53cdd62b8a77e40c1335fea7bfff130';
 
 /// See also [productDetails].
 @ProviderFor(productDetails)
@@ -287,245 +287,39 @@ class _ProductDetailsProviderElement
   String get productId => (origin as ProductDetailsProvider).productId;
 }
 
-String _$cartItemsHash() => r'25159608253f0fa986733287ceebe631def411a5';
+String _$cartItemsHash() => r'8aa66fcf212e9e2ef4b3cf1b37bc0139a3f56524';
 
 /// See also [cartItems].
 @ProviderFor(cartItems)
-const cartItemsProvider = CartItemsFamily();
-
-/// See also [cartItems].
-class CartItemsFamily extends Family<AsyncValue<List<CartItem>>> {
-  /// See also [cartItems].
-  const CartItemsFamily();
-
-  /// See also [cartItems].
-  CartItemsProvider call(String userId) {
-    return CartItemsProvider(userId);
-  }
-
-  @override
-  CartItemsProvider getProviderOverride(covariant CartItemsProvider provider) {
-    return call(provider.userId);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'cartItemsProvider';
-}
-
-/// See also [cartItems].
-class CartItemsProvider extends AutoDisposeFutureProvider<List<CartItem>> {
-  /// See also [cartItems].
-  CartItemsProvider(String userId)
-    : this._internal(
-        (ref) => cartItems(ref as CartItemsRef, userId),
-        from: cartItemsProvider,
-        name: r'cartItemsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$cartItemsHash,
-        dependencies: CartItemsFamily._dependencies,
-        allTransitiveDependencies: CartItemsFamily._allTransitiveDependencies,
-        userId: userId,
-      );
-
-  CartItemsProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.userId,
-  }) : super.internal();
-
-  final String userId;
-
-  @override
-  Override overrideWith(
-    FutureOr<List<CartItem>> Function(CartItemsRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: CartItemsProvider._internal(
-        (ref) => create(ref as CartItemsRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        userId: userId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<List<CartItem>> createElement() {
-    return _CartItemsProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is CartItemsProvider && other.userId == userId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, userId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
+final cartItemsProvider = AutoDisposeFutureProvider<List<CartItem>>.internal(
+  cartItems,
+  name: r'cartItemsProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$cartItemsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin CartItemsRef on AutoDisposeFutureProviderRef<List<CartItem>> {
-  /// The parameter `userId` of this provider.
-  String get userId;
-}
-
-class _CartItemsProviderElement
-    extends AutoDisposeFutureProviderElement<List<CartItem>>
-    with CartItemsRef {
-  _CartItemsProviderElement(super.provider);
-
-  @override
-  String get userId => (origin as CartItemsProvider).userId;
-}
-
-String _$userOrdersHash() => r'7fc82d5c5f2efbd0e2995c841615fcd083e0a587';
+typedef CartItemsRef = AutoDisposeFutureProviderRef<List<CartItem>>;
+String _$userOrdersHash() => r'8be01ee9157c9be2150c0f3374289c4ef3beb2fc';
 
 /// See also [userOrders].
 @ProviderFor(userOrders)
-const userOrdersProvider = UserOrdersFamily();
-
-/// See also [userOrders].
-class UserOrdersFamily extends Family<AsyncValue<List<Order>>> {
-  /// See also [userOrders].
-  const UserOrdersFamily();
-
-  /// See also [userOrders].
-  UserOrdersProvider call(String userId) {
-    return UserOrdersProvider(userId);
-  }
-
-  @override
-  UserOrdersProvider getProviderOverride(
-    covariant UserOrdersProvider provider,
-  ) {
-    return call(provider.userId);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'userOrdersProvider';
-}
-
-/// See also [userOrders].
-class UserOrdersProvider extends AutoDisposeFutureProvider<List<Order>> {
-  /// See also [userOrders].
-  UserOrdersProvider(String userId)
-    : this._internal(
-        (ref) => userOrders(ref as UserOrdersRef, userId),
-        from: userOrdersProvider,
-        name: r'userOrdersProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$userOrdersHash,
-        dependencies: UserOrdersFamily._dependencies,
-        allTransitiveDependencies: UserOrdersFamily._allTransitiveDependencies,
-        userId: userId,
-      );
-
-  UserOrdersProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.userId,
-  }) : super.internal();
-
-  final String userId;
-
-  @override
-  Override overrideWith(
-    FutureOr<List<Order>> Function(UserOrdersRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: UserOrdersProvider._internal(
-        (ref) => create(ref as UserOrdersRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        userId: userId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<List<Order>> createElement() {
-    return _UserOrdersProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is UserOrdersProvider && other.userId == userId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, userId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
+final userOrdersProvider = AutoDisposeFutureProvider<List<Order>>.internal(
+  userOrders,
+  name: r'userOrdersProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$userOrdersHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin UserOrdersRef on AutoDisposeFutureProviderRef<List<Order>> {
-  /// The parameter `userId` of this provider.
-  String get userId;
-}
-
-class _UserOrdersProviderElement
-    extends AutoDisposeFutureProviderElement<List<Order>>
-    with UserOrdersRef {
-  _UserOrdersProviderElement(super.provider);
-
-  @override
-  String get userId => (origin as UserOrdersProvider).userId;
-}
-
-String _$orderItemsHash() => r'8fdbab2b0dcef7c17968b5becd4c7c0675358959';
+typedef UserOrdersRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$orderItemsHash() => r'0954e1837a476478e54d403db4e3355bf944e1ec';
 
 /// See also [orderItems].
 @ProviderFor(orderItems)
@@ -645,7 +439,7 @@ class _OrderItemsProviderElement
   String get orderId => (origin as OrderItemsProvider).orderId;
 }
 
-String _$cartControllerHash() => r'1929862a0242003f1559ed5fa98faf419fbbfc94';
+String _$cartControllerHash() => r'670ee1ebe2059f5eb58e26801876ba702c61233e';
 
 /// See also [CartController].
 @ProviderFor(CartController)
@@ -662,7 +456,7 @@ final cartControllerProvider =
     );
 
 typedef _$CartController = AutoDisposeAsyncNotifier<void>;
-String _$orderControllerHash() => r'31cf5b0dcaa579854981003296ffb5738aed3b2e';
+String _$orderControllerHash() => r'314cc7298e5381f6362d4e826ad633ee9eb30784';
 
 /// See also [OrderController].
 @ProviderFor(OrderController)

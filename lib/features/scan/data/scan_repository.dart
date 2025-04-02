@@ -70,7 +70,7 @@ class ScanRepository {
 
   Future<List<PlantScanResponse>> getScans() async {
     final accessTokens = (await _getAccessTokens()).toSet();
-    log("Getting scans for tokens: $accessTokens");
+    log("Get scans was called with these tokens: $accessTokens");
 
     if (accessTokens.isEmpty) {
       return [];

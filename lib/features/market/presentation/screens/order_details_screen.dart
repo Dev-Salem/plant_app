@@ -12,7 +12,16 @@ class OrderDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orderItemsAsync = ref.watch(orderItemsProvider(orderId));
-
+    ref.listen(orderControllerProvider, (previous, current) {
+      if (current.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete product: ${current.error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
     return Scaffold(
       appBar: AppBar(title: Text('Order #${orderId.substring(0, 8)}'), elevation: 0),
       body: orderItemsAsync.when(

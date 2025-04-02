@@ -17,6 +17,18 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
+    // Listen for errors in the delete product notifier
+    ref.listen(deleteProductNotifierProvider, (previous, current) {
+      if (current.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete product: ${current.error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
@@ -216,26 +228,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
 
     if (confirmed == true) {
-      try {
-        await ref.read(deleteProductNotifierProvider.notifier).deleteProduct(product.id);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Product deleted successfully'),
-              backgroundColor: Colors.green,
-            ),
+      await ref
+          .read(deleteProductNotifierProvider.notifier)
+          .deleteProduct(
+            product.id,
+            onSuccess: () {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Product deleted successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
           );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to delete product: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
     }
   }
 

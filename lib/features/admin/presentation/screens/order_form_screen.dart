@@ -58,6 +58,18 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
     final updateOrderStatus = ref.watch(updateOrderStatusNotifierProvider);
     final isLoading = updateOrderStatus is AsyncLoading;
 
+    // Listen for errors in the update order notifier
+    ref.listen(updateOrderStatusNotifierProvider, (previous, current) {
+      if (current.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update order: ${current.error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Order #${widget.order.id.substring(0, 8)}'),
@@ -193,30 +205,22 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
         status: _selectedStatus,
       );
 
-      try {
-        await ref
-            .read(updateOrderStatusNotifierProvider.notifier)
-            .updateOrderDetails(updatedOrder);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Order updated successfully'),
-              backgroundColor: Colors.green,
-            ),
+      await ref
+          .read(updateOrderStatusNotifierProvider.notifier)
+          .updateOrderDetails(
+            updatedOrder,
+            onSuccess: () {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Order updated successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                Navigator.pop(context);
+              }
+            },
           );
-          Navigator.pop(context);
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to update order: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
     }
   }
 }

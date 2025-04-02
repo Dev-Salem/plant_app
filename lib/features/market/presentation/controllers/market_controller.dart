@@ -169,21 +169,13 @@ class OrderController extends _$OrderController {
 
   Future<void> cancelOrder(String orderId, VoidCallback? onSuccess) async {
     state = const AsyncLoading();
-
-    try {
-      final repository = ref.read(marketRepositoryProvider);
-      await repository.cancelOrder(orderId);
-
+    state = await AsyncValue.guard(() async {
+      await ref.read(marketRepositoryProvider).cancelOrder(orderId);
       // Invalidate orders to refresh the UI
       ref.invalidate(userOrdersProvider);
-
-      state = const AsyncData(null);
-
-      if (onSuccess != null) {
-        onSuccess();
-      }
-    } catch (e, stackTrace) {
-      state = AsyncError(e, stackTrace);
+    });
+    if (!state.hasError && onSuccess != null) {
+      onSuccess();
     }
   }
 }

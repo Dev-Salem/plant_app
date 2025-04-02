@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:plant_app/features/admin/presentation/controllers/admin_controllers.dart';
 import 'package:plant_app/features/admin/presentation/screens/order_form_screen.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
+import 'package:plant_app/features/market/presentation/controllers/market_controller.dart';
 
 class OrderDetailsCard extends ConsumerWidget {
   final Order order;
@@ -15,6 +16,18 @@ class OrderDetailsCard extends ConsumerWidget {
     final orderItemsAsync = ref.watch(adminOrderItemsProvider(order.id));
     final updateOrderStatusAsync = ref.watch(updateOrderStatusNotifierProvider);
     final isUpdating = updateOrderStatusAsync is AsyncLoading;
+
+    // Listen for errors in the update order notifier
+    ref.listen(updateOrderStatusNotifierProvider, (previous, current) {
+      if (current.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update order: ${current.error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -179,23 +192,17 @@ class OrderDetailsCard extends ConsumerWidget {
                   Navigator.of(ctx).pop();
                   ref
                       .read(updateOrderStatusNotifierProvider.notifier)
-                      .updateOrder(order.id)
-                      .then((_) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Order marked as completed'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      })
-                      .catchError((e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to update order: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      });
+                      .updateOrder(
+                        order.id,
+                        onSuccess: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Order marked as completed'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        },
+                      );
                 },
                 style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
                 child: const Text('Confirm'),
@@ -224,23 +231,17 @@ class OrderDetailsCard extends ConsumerWidget {
                   Navigator.of(ctx).pop();
                   ref
                       .read(updateOrderStatusNotifierProvider.notifier)
-                      .deleteOrder(order.id)
-                      .then((_) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Order deleted successfully'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      })
-                      .catchError((e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to delete order: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      });
+                      .deleteOrder(
+                        order.id,
+                        onSuccess: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Order deleted successfully'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        },
+                      );
                 },
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 child: const Text('Delete'),

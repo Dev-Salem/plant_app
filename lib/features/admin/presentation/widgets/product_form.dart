@@ -114,6 +114,30 @@ class _ProductFormState extends ConsumerState<ProductForm> {
   Widget build(BuildContext context) {
     final isEditing = widget.product != null;
 
+    // Listen for errors in the add product notifier
+    ref.listen(addProductNotifierProvider, (previous, current) {
+      if (current.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add product: ${current.error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+
+    // Listen for errors in the update product notifier
+    ref.listen(updateProductNotifierProvider, (previous, current) {
+      if (current.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update product: ${current.error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+
     return Form(
       key: _formKey,
       child: SingleChildScrollView(

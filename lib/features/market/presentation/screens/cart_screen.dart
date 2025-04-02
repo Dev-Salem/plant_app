@@ -11,7 +11,16 @@ class CartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItemsAsync = ref.watch(cartItemsProvider);
-
+    ref.listen(cartControllerProvider, (previous, current) {
+      if (current.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update cart: ${current.error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
     return Scaffold(
       appBar: AppBar(title: const Text('Shopping Cart'), elevation: 0),
       body: cartItemsAsync.when(

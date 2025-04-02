@@ -35,7 +35,7 @@ class AddProductNotifier extends _$AddProductNotifier {
     return;
   }
 
-  Future<void> addProduct(Product product) async {
+  Future<void> addProduct(Product product, {Function? onSuccess}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(adminRepositoryProvider);
@@ -43,6 +43,8 @@ class AddProductNotifier extends _$AddProductNotifier {
       // Invalidate the products list to trigger a refresh
       ref.invalidate(productsProvider);
     });
+
+    if (!state.hasError && onSuccess != null) onSuccess();
   }
 }
 
@@ -54,7 +56,7 @@ class UpdateProductNotifier extends _$UpdateProductNotifier {
     return;
   }
 
-  Future<void> updateProduct(Product product) async {
+  Future<void> updateProduct(Product product, {Function? onSuccess}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(adminRepositoryProvider);
@@ -62,6 +64,8 @@ class UpdateProductNotifier extends _$UpdateProductNotifier {
       // Invalidate the products list to trigger a refresh
       ref.invalidate(productsProvider);
     });
+
+    if (!state.hasError && onSuccess != null) onSuccess();
   }
 }
 
@@ -73,7 +77,7 @@ class DeleteProductNotifier extends _$DeleteProductNotifier {
     return;
   }
 
-  Future<void> deleteProduct(String productId) async {
+  Future<void> deleteProduct(String productId, {Function? onSuccess}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(adminRepositoryProvider);
@@ -81,6 +85,8 @@ class DeleteProductNotifier extends _$DeleteProductNotifier {
       // Invalidate the products list to trigger a refresh
       ref.invalidate(productsProvider);
     });
+
+    if (!state.hasError && onSuccess != null) onSuccess();
   }
 }
 
@@ -93,7 +99,7 @@ class UpdateOrderStatusNotifier extends _$UpdateOrderStatusNotifier {
     return;
   }
 
-  Future<void> updateOrder(String orderId) async {
+  Future<void> updateOrder(String orderId, {Function? onSuccess}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(adminRepositoryProvider);
@@ -103,9 +109,11 @@ class UpdateOrderStatusNotifier extends _$UpdateOrderStatusNotifier {
       // Invalidate specific order details if it's being viewed
       ref.invalidate(adminOrderDetailsProvider(orderId));
     });
+
+    if (!state.hasError && onSuccess != null) onSuccess();
   }
 
-  Future<void> updateOrderDetails(Order order) async {
+  Future<void> updateOrderDetails(Order order, {Function? onSuccess}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(adminRepositoryProvider);
@@ -115,9 +123,11 @@ class UpdateOrderStatusNotifier extends _$UpdateOrderStatusNotifier {
       // Invalidate specific order details if it's being viewed
       ref.invalidate(adminOrderDetailsProvider(order.id));
     });
+
+    if (!state.hasError && onSuccess != null) onSuccess();
   }
 
-  Future<void> deleteOrder(String orderId) async {
+  Future<void> deleteOrder(String orderId, {Function? onSuccess}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(adminRepositoryProvider);
@@ -127,5 +137,7 @@ class UpdateOrderStatusNotifier extends _$UpdateOrderStatusNotifier {
       // Invalidate specific order details if it's being viewed
       ref.invalidate(adminOrderDetailsProvider(orderId));
     });
+
+    if (!state.hasError && onSuccess != null) onSuccess();
   }
 }

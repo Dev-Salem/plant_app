@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/core/theme/app_theme.dart';
 import 'package:plant_app/core/constants/routes.dart';
+import 'package:plant_app/core/widgets/use_phone_widget.dart';
 import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:plant_app/features/market/presentation/screens/market_screen.dart';
@@ -75,26 +76,30 @@ class MainApp extends ConsumerWidget {
             return null;
         }
       },
-      home: authStatus.when(
-        data: (user) => user != null ? const HomeScreen() : const WelcomeScreen(),
-        loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-        error:
-            (error, stackTrace) => Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(ErrorHandler.getFriendlyErrorMessage(error as Exception)),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: () => ref.refresh(authStatusProvider),
-                      child: const Text('Retry'),
+      home:
+          context.isPhone
+              ? authStatus.when(
+                data: (user) => user != null ? const HomeScreen() : const WelcomeScreen(),
+                loading:
+                    () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+                error:
+                    (error, stackTrace) => Scaffold(
+                      body: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(ErrorHandler.getFriendlyErrorMessage(error as Exception)),
+                            const SizedBox(height: 16),
+                            FilledButton(
+                              onPressed: () => ref.refresh(authStatusProvider),
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-      ),
+              )
+              : UsePhoneWidget(),
     );
   }
 }

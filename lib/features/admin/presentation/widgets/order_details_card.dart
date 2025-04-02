@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:plant_app/features/admin/presentation/controllers/admin_controllers.dart';
+import 'package:plant_app/features/admin/presentation/screens/order_form_screen.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 
 class OrderDetailsCard extends ConsumerWidget {
@@ -88,6 +89,36 @@ class OrderDetailsCard extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // Action buttons section
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              // Edit button
+              TextButton.icon(
+                icon: const Icon(Icons.edit, size: 18),
+                label: const Text('Edit'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => OrderFormScreen(order: order)),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              // Delete button
+              TextButton.icon(
+                icon: const Icon(Icons.delete, size: 18),
+                label: const Text('Delete'),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                onPressed: () {
+                  _confirmDelete(context, ref);
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Mark as completed button (only for pending orders)
           if (order.status.toLowerCase() == 'pending')
             SizedBox(
               width: double.infinity,
@@ -168,6 +199,51 @@ class OrderDetailsCard extends ConsumerWidget {
                 },
                 style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
                 child: const Text('Confirm'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Delete Order'),
+            content: Text(
+              'Are you sure you want to delete Order #${order.id.substring(0, 8)}?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  ref
+                      .read(updateOrderStatusNotifierProvider.notifier)
+                      .deleteOrder(order.id)
+                      .then((_) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Order deleted successfully'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      })
+                      .catchError((e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to delete order: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      });
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Delete'),
               ),
             ],
           ),

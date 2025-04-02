@@ -7,7 +7,19 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'appwrite_admin_repository.g.dart';
 
-class AppwriteAdminRepository implements IAdminService {
+abstract class AdminRepository {
+  Future<void> addProduct(Product product);
+  Future<void> updateProduct(Product product);
+  Future<void> deleteProduct(String productId);
+  Future<List<Order>> getAllOrders();
+  Future<Order> getOrderDetails(String orderId);
+  Future<List<OrderItem>> getOrderItems(String orderId);
+  Future<void> updateOrder(String orderId); // Mark as completed
+  Future<void> updateOrderDetails(Order order); // Update all order details
+  Future<void> deleteOrder(String orderId);
+}
+
+class AppwriteAdminRepository implements AdminRepository {
   final Databases _databases;
   final String _databaseId;
 
@@ -81,7 +93,18 @@ class AppwriteAdminRepository implements IAdminService {
     );
   }
 
+  @override
+  Future<void> updateOrderDetails(Order order) async {
+    await _databases.updateDocument(
+      databaseId: _databaseId,
+      collectionId: _ordersCollection,
+      documentId: order.id,
+      data: order.toMap(),
+    );
+  }
+
   // Additional helper method to get order items
+  @override
   Future<List<OrderItem>> getOrderItems(String orderId) async {
     final response = await _databases.listDocuments(
       databaseId: _databaseId,

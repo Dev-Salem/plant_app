@@ -287,7 +287,7 @@ class _AdminOrderItemsProviderElement
 }
 
 String _$addProductNotifierHash() =>
-    r'5a911d84dc6f7281ba280656bc733d8cf1201f04';
+    r'64ffdbe432d4855a79691e2bcc998c11f99f0174';
 
 /// See also [AddProductNotifier].
 @ProviderFor(AddProductNotifier)
@@ -305,7 +305,7 @@ final addProductNotifierProvider =
 
 typedef _$AddProductNotifier = AutoDisposeAsyncNotifier<void>;
 String _$updateProductNotifierHash() =>
-    r'51b1153e38ecc93fedf293f4df4dff6e3c250b96';
+    r'fd12854ce8fc758f5d6168b7c1abe25c3a9ce54e';
 
 /// See also [UpdateProductNotifier].
 @ProviderFor(UpdateProductNotifier)
@@ -323,7 +323,7 @@ final updateProductNotifierProvider =
 
 typedef _$UpdateProductNotifier = AutoDisposeAsyncNotifier<void>;
 String _$deleteProductNotifierHash() =>
-    r'e3c4c76a17250383e1b72a1ed8a19922f2ca9143';
+    r'cf55e434abe8fab207b02d5d3b55442d680b6691';
 
 /// See also [DeleteProductNotifier].
 @ProviderFor(DeleteProductNotifier)
@@ -341,7 +341,7 @@ final deleteProductNotifierProvider =
 
 typedef _$DeleteProductNotifier = AutoDisposeAsyncNotifier<void>;
 String _$updateOrderStatusNotifierHash() =>
-    r'3c7b987fdbbeb2b7d8c6f96a7886736ed478e74e';
+    r'254f80d151f754d7d2394ac6927b120e013c9050';
 
 /// See also [UpdateOrderStatusNotifier].
 @ProviderFor(UpdateOrderStatusNotifier)

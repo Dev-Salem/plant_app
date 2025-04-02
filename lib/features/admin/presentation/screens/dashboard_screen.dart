@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/features/admin/presentation/controllers/admin_controllers.dart';
+import 'package:plant_app/features/admin/presentation/screens/product_form_screen.dart';
+import 'package:plant_app/features/admin/presentation/widgets/orders_tab.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 import 'package:plant_app/features/market/presentation/controllers/market_controller.dart';
 import 'package:intl/intl.dart';
@@ -22,37 +25,41 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         elevation: 0,
       ),
       body: _buildTabSection(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProductFormScreen()),
+          );
+        },
+        backgroundColor: const Color(0xFF2E7D32),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
   Widget _buildTabSection() {
-    return Expanded(
-      child: DefaultTabController(
-        length: 1, // We'll add more tabs later
-        child: Column(
-          children: [
-            Container(
-              // color: const Color(0xFFECEFEF),
-              child: const TabBar(
-                tabs: [
-                  Tab(text: 'Products'),
-                  // We'll add more tabs later: Orders, Users, etc.
-                ],
-                labelColor: Color(0xFF2E7D32),
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Color(0xFF2E7D32),
-              ),
+    return DefaultTabController(
+      length: 2, // Updated to include Orders tab
+      child: Column(
+        children: [
+          Container(
+            child: const TabBar(
+              tabs: [Tab(text: 'Products'), Tab(text: 'Orders')],
+              labelColor: Color(0xFF2E7D32),
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Color(0xFF2E7D32),
             ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildProductsTab(),
-                  // We'll add more tab views later
-                ],
-              ),
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildProductsTab(),
+                const OrdersTab(), // New OrdersTab widget
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -160,7 +167,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       icon: const Icon(Icons.edit, size: 18),
                       label: const Text('Edit'),
                       onPressed: () {
-                        // TODO: Implement edit functionality
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductFormScreen(product: product),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(width: 8),
@@ -169,7 +181,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       label: const Text('Delete'),
                       style: TextButton.styleFrom(foregroundColor: Colors.red),
                       onPressed: () {
-                        // TODO: Implement delete functionality
+                        _confirmDelete(product);
                       },
                     ),
                   ],
@@ -180,6 +192,51 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDelete(Product product) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete Product'),
+            content: Text('Are you sure you want to delete "${product.name}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref.read(deleteProductNotifierProvider.notifier).deleteProduct(product.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Product deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete product: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildInfoRow(String label, String value) {

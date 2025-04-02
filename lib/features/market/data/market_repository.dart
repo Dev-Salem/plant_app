@@ -1,35 +1,25 @@
-import '../domain/entities.dart';
+import 'package:plant_app/features/market/domain/entities.dart';
 
-abstract class MarketRepository {
-  // Product operations
+abstract class IMarketplaceService {
   Future<List<Product>> getProducts();
-  Future<Product> getProductById(String id);
-  Future<List<Product>> getProductsByCategory(String categoryId);
-  Future<List<Product>> getFeaturedProducts();
-  Future<Product> createProduct(Product product);
-  Future<Product> updateProduct(Product product);
-  Future<bool> deleteProduct(String id);
 
-  // Category operations
-  Future<List<Category>> getCategories();
-  Future<Category> getCategoryById(String id);
-  Future<Category> createCategory(Category category);
-  Future<Category> updateCategory(Category category);
-  Future<bool> deleteCategory(String id);
+  Future<List<Product>> getProductsByCategory(String category);
 
-  // Cart operations
-  Future<Cart> getCart(String userId);
-  Future<Cart> updateCart(Cart cart);
-  Future<bool> clearCart(String userId);
+  Future<Product> getProduct(String productId);
 
-  // Order operations
-  Future<List<Order>> getOrders(String userId);
-  Future<Order> getOrderById(String id);
-  Future<Order> createOrder(Order order);
-  Future<Order> updateOrderStatus(String id, OrderStatus status);
+  Future<List<CartItem>> getCart(String userId);
 
-  // Review operations
-  Future<List<Review>> getProductReviews(String productId);
-  Future<Review> createReview(Review review);
-  Future<bool> deleteReview(String id);
+  Future<void> addToCart(String userId, Product product, int quantity);
+
+  Future<void> removeFromCart(String cartItemId);
+
+  Future<void> updateQuantity(String cartItemId, int quantity);
+
+  Future<void> clearCart(String userId);
+
+  Future<Order> placeOrder(String userId, List<CartItem> cartItems, String? address);
+
+  Future<List<Order>> getUserOrders(String userId);
+
+  Future<List<OrderItem>> getOrderItems(String orderId);
 }

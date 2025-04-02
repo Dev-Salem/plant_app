@@ -148,7 +148,7 @@ class OrderDetailsCard extends ConsumerWidget {
                   Navigator.of(ctx).pop();
                   ref
                       .read(updateOrderStatusNotifierProvider.notifier)
-                      .updateOrderStatus(order.id)
+                      .updateOrder(order.id)
                       .then((_) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

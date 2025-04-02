@@ -93,11 +93,23 @@ class UpdateOrderStatusNotifier extends _$UpdateOrderStatusNotifier {
     return;
   }
 
-  Future<void> updateOrderStatus(String orderId) async {
+  Future<void> updateOrder(String orderId) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(adminRepositoryProvider);
       await repository.updateOrder(orderId);
+      // Invalidate orders to refresh the list
+      ref.invalidate(adminOrdersProvider);
+      // Invalidate specific order details if it's being viewed
+      ref.invalidate(adminOrderDetailsProvider(orderId));
+    });
+  }
+
+    Future<void> deleteOrder(String orderId) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(adminRepositoryProvider);
+      await repository.deleteOrder(orderId);
       // Invalidate orders to refresh the list
       ref.invalidate(adminOrdersProvider);
       // Invalidate specific order details if it's being viewed

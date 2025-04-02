@@ -10,4 +10,5 @@ abstract class IAdminService {
   Future<List<Order>> getAllOrders();
   Future<Order> getOrderDetails(String orderId);
   Future<void> updateOrder(String orderId);
+  Future<void> deleteOrder(String orderId);
 }

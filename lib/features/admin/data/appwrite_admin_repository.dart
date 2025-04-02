@@ -91,6 +91,15 @@ class AppwriteAdminRepository implements IAdminService {
 
     return response.documents.map((doc) => OrderItem.fromDoc(doc)).toList();
   }
+
+  @override
+  Future<void> deleteOrder(String orderId) async {
+    await _databases.deleteDocument(
+      databaseId: _databaseId,
+      collectionId: _ordersCollection,
+      documentId: orderId,
+    );
+  }
 }
 
 @riverpod

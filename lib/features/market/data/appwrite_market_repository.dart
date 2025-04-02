@@ -130,7 +130,7 @@ class AppwriteMarketRepository implements IMarketplaceService {
   }
 
   @override
-  Future<Order> placeOrder(List<CartItem> cartItems, String? address) async {
+  Future<Order> placeOrder(List<CartItem> cartItems, String address) async {
     // Calculate total amount
     double totalAmount = 0;
     for (var item in cartItems) {
@@ -148,7 +148,7 @@ class AppwriteMarketRepository implements IMarketplaceService {
         'totalAmount': totalAmount,
         'dateTime': DateTime.now().toIso8601String(),
         'status': 'pending',
-        'address': address,
+        'address': address, // Now this is required
       },
     );
 
@@ -194,6 +194,32 @@ class AppwriteMarketRepository implements IMarketplaceService {
     );
 
     return response.documents.map((doc) => OrderItem.fromDoc(doc)).toList();
+  }
+
+  @override
+  Future<void> cancelOrder(String orderId) async {
+    // Check if the order exists and belongs to the current user
+    final response = await _databases.getDocument(
+      databaseId: _databaseId,
+      collectionId: _ordersCollection,
+      documentId: orderId,
+    );
+
+    final Order order = Order.fromDoc(response);
+
+    // Only allow cancellation if the order belongs to the current user and is pending
+    if (order.userId == userId && order.status == 'pending') {
+      await _databases.updateDocument(
+        databaseId: _databaseId,
+        collectionId: _ordersCollection,
+        documentId: orderId,
+        data: {'status': 'canceled'}, // Update status to canceled
+      );
+    } else {
+      throw Exception(
+        'You cannot cancel this order. It may be already completed or belong to another user.',
+      );
+    }
   }
 }
 

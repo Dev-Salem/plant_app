@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/core/constants/routes.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 import 'package:plant_app/features/market/presentation/controllers/market_controller.dart';
+import 'package:plant_app/features/market/presentation/widgets/address_form.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -63,7 +64,6 @@ class _CartItemsList extends ConsumerStatefulWidget {
 
 class _CartItemsListState extends ConsumerState<_CartItemsList> {
   late List<CartItem> _items;
-
 
   @override
   void initState() {
@@ -299,17 +299,62 @@ class QuantitySelector extends ConsumerWidget {
   }
 }
 
-class CartSummary extends ConsumerWidget {
+class CartSummary extends ConsumerStatefulWidget {
   final List<CartItem> cartItems;
 
   const CartSummary({super.key, required this.cartItems});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final total = calculateCartTotal(cartItems);
+  ConsumerState<CartSummary> createState() => _CartSummaryState();
+}
+
+class _CartSummaryState extends ConsumerState<CartSummary> {
+  bool _showAddressForm = false;
+
+  void _proceedToAddress() {
+    setState(() {
+      _showAddressForm = true;
+    });
+  }
+
+  void _placeOrder(String address) {
+    // Hide the address form after submission
+    setState(() {
+      _showAddressForm = false;
+    });
+
+    ref.read(orderControllerProvider.notifier).placeOrder(
+      widget.cartItems.first.userId,
+      widget.cartItems,
+      address, // Pass the address to the controller
+      () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Order placed successfully!'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        Navigator.of(context).pushReplacementNamed(Routes.marketOrders);
+      },
+    );
+  }
+
+  double calculateCartTotal(List<CartItem> items) {
+    return items.fold(0, (sum, item) => sum + (item.price * item.quantity));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = calculateCartTotal(widget.cartItems);
     final orderControllerState = ref.watch(orderControllerProvider);
     final isProcessing = orderControllerState is AsyncLoading;
 
+    // If showing address form, return it
+    if (_showAddressForm) {
+      return AddressForm(onAddressSubmitted: _placeOrder);
+    }
+
+    // Otherwise show the cart summary
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -342,27 +387,7 @@ class CartSummary extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed:
-                    isProcessing
-                        ? null
-                        : () {
-                          // Placeholder for checkout logic
-                          // Could navigate to checkout screen
-                          ref.read(orderControllerProvider.notifier).placeOrder(
-                            cartItems.first.userId, // Using first item's userId
-                            cartItems,
-                            null, // Address would come from a form
-                            () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Order placed successfully!'),
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
-                              Navigator.of(context).pushReplacementNamed(Routes.marketOrders);
-                            },
-                          );
-                        },
+                onPressed: isProcessing ? null : _proceedToAddress,
                 child:
                     isProcessing
                         ? const SizedBox(
@@ -373,7 +398,7 @@ class CartSummary extends ConsumerWidget {
                             strokeWidth: 2.0,
                           ),
                         )
-                        : const Text('Checkout'),
+                        : const Text('Proceed to Checkout'),
               ),
             ),
           ],

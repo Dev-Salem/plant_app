@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:appwrite/models.dart';
 import 'package:equatable/equatable.dart';
 
@@ -143,7 +145,7 @@ class Order extends Equatable {
   final double totalAmount;
   final DateTime dateTime;
   final String status; // "pending" or "completed"
-  final String? address;
+  final String address; // Changed from String? to String (required)
 
   const Order({
     required this.id,
@@ -151,7 +153,7 @@ class Order extends Equatable {
     required this.totalAmount,
     required this.dateTime,
     required this.status,
-    this.address,
+    required this.address, // Changed from optional to required
   });
 
   Map<String, dynamic> toMap() {
@@ -177,7 +179,7 @@ class Order extends Equatable {
 
   @override
   List<Object> get props {
-    return [id, userId, totalAmount, dateTime, status];
+    return [id, userId, totalAmount, dateTime, status, address]; // Added address to props
   }
 
   Order copyWith({

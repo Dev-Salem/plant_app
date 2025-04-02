@@ -121,6 +121,22 @@ class OrderCard extends StatelessWidget {
                   Text(formattedTime, style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      order.address,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               const Divider(),
               const SizedBox(height: 8),

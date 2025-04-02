@@ -93,6 +93,8 @@ class OrderSummary extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersList = ref.watch(userOrdersProvider);
+    final orderControllerState = ref.watch(orderControllerProvider);
+    final isLoading = orderControllerState is AsyncLoading;
 
     return ordersList.when(
       data: (orders) {
@@ -115,21 +117,83 @@ class OrderSummary extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            if (order.address != null && order.address!.isNotEmpty)
+            // Address display
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(order.address, style: Theme.of(context).textTheme.bodyMedium),
+                  ),
+                ],
+              ),
+            ),
+
+            // Show cancel button only for pending orders
+            if (order.status == 'pending')
               Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        order.address!,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                  ],
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed:
+                        isLoading
+                            ? null
+                            : () {
+                              // Show confirmation dialog
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (ctx) => AlertDialog(
+                                      title: const Text('Cancel Order'),
+                                      content: const Text(
+                                        'Are you sure you want to cancel this order?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(ctx).pop();
+                                          },
+                                          child: const Text('No'),
+                                        ),
+                                        FilledButton(
+                                          onPressed: () {
+                                            Navigator.of(ctx).pop();
+                                            ref
+                                                .read(orderControllerProvider.notifier)
+                                                .cancelOrder(order.id, () {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'Order cancelled successfully',
+                                                      ),
+                                                    ),
+                                                  );
+                                                  Navigator.of(
+                                                    context,
+                                                  ).pop(); // Go back to orders screen
+                                                });
+                                          },
+                                          child: const Text('Yes, Cancel'),
+                                        ),
+                                      ],
+                                    ),
+                              );
+                            },
+                    icon:
+                        isLoading
+                            ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.cancel_outlined, color: Colors.red),
+                    label: const Text('Cancel Order', style: TextStyle(color: Colors.red)),
+                    style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
+                  ),
                 ),
               ),
 

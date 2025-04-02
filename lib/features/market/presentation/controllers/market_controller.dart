@@ -149,18 +149,41 @@ class OrderController extends _$OrderController {
   Future<void> placeOrder(
     String userId,
     List<CartItem> cartItems,
-    String? address,
+    String address, // Now this is required
     VoidCallback? onSuccess,
   ) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(marketRepositoryProvider).placeOrder(cartItems, address);
-      // Invalidate both cart and orders providers to refresh UI
-      ref.invalidate(cartItemsProvider);
+
+    try {
+      final repository = ref.read(marketRepositoryProvider);
+      await repository.placeOrder(cartItems, address);
+      state = const AsyncData(null);
+
+      if (onSuccess != null) {
+        onSuccess();
+      }
+    } catch (e, stackTrace) {
+      state = AsyncError(e, stackTrace);
+    }
+  }
+
+  Future<void> cancelOrder(String orderId, VoidCallback? onSuccess) async {
+    state = const AsyncLoading();
+
+    try {
+      final repository = ref.read(marketRepositoryProvider);
+      await repository.cancelOrder(orderId);
+
+      // Invalidate orders to refresh the UI
       ref.invalidate(userOrdersProvider);
-    });
-    if (!state.hasError && onSuccess != null) {
-      onSuccess();
+
+      state = const AsyncData(null);
+
+      if (onSuccess != null) {
+        onSuccess();
+      }
+    } catch (e, stackTrace) {
+      state = AsyncError(e, stackTrace);
     }
   }
 }

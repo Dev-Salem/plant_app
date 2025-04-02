@@ -17,7 +17,9 @@ abstract class IMarketplaceService {
 
   Future<void> clearCart();
 
-  Future<Order> placeOrder(List<CartItem> cartItems, String? address);
+  Future<Order> placeOrder(List<CartItem> cartItems, String address);
+
+  Future<void> cancelOrder(String orderId); // New method to cancel an order
 
   Future<List<Order>> getUserOrders();
 

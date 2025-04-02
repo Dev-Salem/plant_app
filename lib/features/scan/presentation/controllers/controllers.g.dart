@@ -6,7 +6,7 @@ part of 'controllers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$savedScansHash() => r'fa1a3ae3ab9f758a95ccb368c9a2d7d895689836';
+String _$savedScansHash() => r'35314a04e07b0fb0b8bf2dd758d2e16a82af063a';
 
 /// See also [SavedScans].
 @ProviderFor(SavedScans)

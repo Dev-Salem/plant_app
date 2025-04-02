@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:plant_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:plant_app/theme/theme_notifier.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -20,6 +21,12 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () async {
                 await authController.signOut();
               },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.dark_mode),
+              title: const Text('Change Theme'),
+              onTap: ref.read(themeProvider.notifier).toggleTheme,
             ),
             const Divider(),
           ],

@@ -1,7 +1,7 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:plant_app/core/app_theme.dart';
+import 'package:plant_app/theme/app_theme.dart';
 import 'package:plant_app/core/constants/routes.dart';
 import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/auth/presentation/screens/verify_otp_screen.dart';
@@ -15,6 +15,7 @@ import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.
 import 'package:plant_app/features/market/presentation/screens/cart_screen.dart';
 import 'package:plant_app/features/market/presentation/screens/orders_screen.dart';
 import 'package:plant_app/features/market/presentation/screens/order_details_screen.dart';
+import 'package:plant_app/theme/theme_notifier.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -34,7 +35,7 @@ class MainApp extends ConsumerWidget {
         appBarTheme: context.appBarTheme.copyWith(centerTitle: true),
       ),
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
+      themeMode: ref.watch(themeProvider),
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case Routes.welcome:

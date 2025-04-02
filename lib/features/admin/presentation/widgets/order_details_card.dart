@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/admin/presentation/controllers/admin_controllers.dart';
 import 'package:plant_app/features/admin/presentation/screens/order_form_screen.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
@@ -21,7 +22,7 @@ class OrderDetailsCard extends ConsumerWidget {
       if (current.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update order: ${current.error.toString()}'),
+            content: Text(ErrorHandler.getFriendlyErrorMessage(current.error as Exception)),
             backgroundColor: Colors.red,
           ),
         );
@@ -93,7 +94,7 @@ class OrderDetailsCard extends ConsumerWidget {
                 ),
             error:
                 (error, stack) => Text(
-                  'Failed to load order items: ${error.toString()}',
+                 ErrorHandler.getFriendlyErrorMessage(error as Exception),
                   style: const TextStyle(color: Colors.red),
                 ),
           ),

@@ -18,7 +18,7 @@ class SignInScreen extends ConsumerWidget {
       state.whenOrNull(
         error:
             (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(HandleError.getFriendlyErrorMessage(error as Exception))),
+              SnackBar(content: Text(ErrorHandler.getFriendlyErrorMessage(error as Exception))),
             ),
       );
     });

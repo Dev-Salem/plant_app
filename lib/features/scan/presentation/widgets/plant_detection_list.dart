@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/scan/data/scan_repository.dart';
 import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.dart';
@@ -34,7 +35,7 @@ class PlantDetectionList extends ConsumerWidget {
               child: Column(
                 children: [
                   Text(
-                    'Error loading plants: ${error.toString()}',
+                   ErrorHandler.getFriendlyErrorMessage(error as Exception),
                     style: const TextStyle(color: Colors.red),
                   ),
                   TextButton(

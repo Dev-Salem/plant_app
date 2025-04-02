@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 import 'package:plant_app/features/market/presentation/controllers/market_controller.dart';
 
@@ -12,16 +13,18 @@ class OrderDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orderItemsAsync = ref.watch(orderItemsProvider(orderId));
-    ref.listen(orderControllerProvider, (previous, current) {
-      if (current.hasError) {
+    ref.listen(
+      orderControllerProvider,
+      (_, state) {},
+      onError: (error, stackTrace) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete product: ${current.error.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(ErrorHandler.getFriendlyErrorMessage(error as Exception)),
+            duration: const Duration(seconds: 2),
           ),
         );
-      }
-    });
+      },
+    );
     return Scaffold(
       appBar: AppBar(title: Text('Order #${orderId.substring(0, 8)}'), elevation: 0),
       body: orderItemsAsync.when(
@@ -84,7 +87,7 @@ class OrderDetailsScreen extends ConsumerWidget {
         error:
             (error, stackTrace) => Center(
               child: Text(
-                'Error loading order details: ${error.toString()}',
+                ErrorHandler.getFriendlyErrorMessage(error as Exception),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -228,7 +231,7 @@ class OrderSummary extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Text('Error: ${error.toString()}'),
+      error: (error, stackTrace) => Text(ErrorHandler.getFriendlyErrorMessage(error as Exception)),
     );
   }
 }

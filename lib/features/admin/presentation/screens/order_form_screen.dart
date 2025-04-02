@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/admin/presentation/controllers/admin_controllers.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 
@@ -63,7 +64,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
       if (current.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update order: ${current.error.toString()}'),
+            content: Text(ErrorHandler.getFriendlyErrorMessage(current.error as Exception)),
             backgroundColor: Colors.red,
           ),
         );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:plant_app/core/constants/routes.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 import 'package:plant_app/features/market/presentation/controllers/market_controller.dart';
 
@@ -49,7 +50,7 @@ class OrdersScreen extends ConsumerWidget {
         error:
             (error, stackTrace) => Center(
               child: Text(
-                'Error loading orders: ${error.toString()}',
+                ErrorHandler.getFriendlyErrorMessage(error as Exception),
                 textAlign: TextAlign.center,
               ),
             ),

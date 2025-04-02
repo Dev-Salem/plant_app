@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/admin/presentation/controllers/admin_controllers.dart';
 import 'package:plant_app/features/admin/presentation/screens/product_form_screen.dart';
 import 'package:plant_app/features/admin/presentation/widgets/orders_tab.dart';
@@ -22,7 +23,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       if (current.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete product: ${current.error.toString()}'),
+            content: Text(ErrorHandler.getFriendlyErrorMessage(current.error as Exception)),
             backgroundColor: Colors.red,
           ),
         );
@@ -102,7 +103,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       error:
           (error, stackTrace) => Center(
             child: Text(
-              'Error loading products: ${error.toString()}',
+             ErrorHandler.getFriendlyErrorMessage(error as Exception),
               style: const TextStyle(color: Colors.red),
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/admin/presentation/controllers/admin_controllers.dart';
 import 'package:plant_app/features/admin/presentation/widgets/order_details_card.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
@@ -37,7 +38,7 @@ class OrdersTab extends ConsumerWidget {
       error:
           (error, stackTrace) => Center(
             child: Text(
-              'Error loading orders: ${error.toString()}',
+             ErrorHandler.getFriendlyErrorMessage(error as Exception),
               style: const TextStyle(color: Colors.red),
             ),
           ),

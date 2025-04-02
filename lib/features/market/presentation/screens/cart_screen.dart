@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/core/constants/routes.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 import 'package:plant_app/features/market/presentation/controllers/market_controller.dart';
 import 'package:plant_app/features/market/presentation/widgets/address_form.dart';
@@ -15,7 +16,7 @@ class CartScreen extends ConsumerWidget {
       if (current.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update cart: ${current.error.toString()}'),
+            content: Text(ErrorHandler.getFriendlyErrorMessage(current.error as Exception)),
             backgroundColor: Colors.red,
           ),
         );

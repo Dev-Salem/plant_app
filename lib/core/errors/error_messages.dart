@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/widgets.dart';
 
-class HandleError {
+class ErrorHandler {
   static String getFriendlyErrorMessage(Exception exception) {
     debugPrint(exception.toString());
     final errorMessages = {
@@ -93,11 +95,13 @@ class HandleError {
           'Daily limit of 3 requests was exceeded. Please upgrade to Pro to enjoy using this feature or come tomorrow',
       'network_exception':
           'Network error. Please check your internet connection and try again.',
-      'rate_time_limit_exceeded': 'Rate Time Limit. Please try again after a minute or two.',
     };
 
     if (exception is AppwriteException) {
       return errorMessages[exception.type] ?? 'Something went wrong';
+    }
+    if (exception is SocketException) {
+      return "Network error, check your internet connection";
     }
 
     return 'An unknown error occurred. Please contact support if this continues.';

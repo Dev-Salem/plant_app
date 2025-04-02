@@ -1,7 +1,8 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:plant_app/theme/app_theme.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
+import 'package:plant_app/core/theme/app_theme.dart';
 import 'package:plant_app/core/constants/routes.dart';
 import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/auth/presentation/screens/verify_otp_screen.dart';
@@ -15,7 +16,7 @@ import 'package:plant_app/features/scan/presentation/widgets/plant_details_view.
 import 'package:plant_app/features/market/presentation/screens/cart_screen.dart';
 import 'package:plant_app/features/market/presentation/screens/orders_screen.dart';
 import 'package:plant_app/features/market/presentation/screens/order_details_screen.dart';
-import 'package:plant_app/theme/theme_notifier.dart';
+import 'package:plant_app/core/theme/theme_notifier.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -83,7 +84,7 @@ class MainApp extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Error: ${error.toString()}'),
+                    Text(ErrorHandler.getFriendlyErrorMessage(error as Exception)),
                     const SizedBox(height: 16),
                     FilledButton(
                       onPressed: () => ref.refresh(authStatusProvider),

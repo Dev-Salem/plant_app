@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/scan/domain/entities.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/features/scan/presentation/controllers/controllers.dart';
@@ -17,7 +18,10 @@ class PlantDetailsView extends ConsumerWidget {
       (_, state) {},
       onError: (error, stackTrace) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.toString()), duration: const Duration(seconds: 2)),
+          SnackBar(
+            content: Text(ErrorHandler.getFriendlyErrorMessage(error as Exception)),
+            duration: const Duration(seconds: 2),
+          ),
         );
       },
     );
@@ -466,8 +470,6 @@ class PlantDetailsView extends ConsumerWidget {
     }
     return "Unknown";
   }
-
-
 
   double _getTopConfidence() {
     if (scanResult.result.crop.suggestions.isNotEmpty) {

@@ -2,6 +2,7 @@ import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plant_app/core/constants/routes.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 import 'package:plant_app/features/market/presentation/controllers/market_controller.dart';
 
@@ -13,16 +14,18 @@ class ProductDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productAsync = ref.watch(productDetailsProvider(productId));
-    ref.listen(productsProvider, (previous, current) {
-      if (current.hasError) {
+    ref.listen(
+      productsProvider,
+      (_, state) {},
+      onError: (error, stackTrace) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update product: ${current.error.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(ErrorHandler.getFriendlyErrorMessage(error as Exception)),
+            duration: const Duration(seconds: 2),
           ),
         );
-      }
-    });
+      },
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Details'),

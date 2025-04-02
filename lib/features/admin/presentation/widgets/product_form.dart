@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/core/errors/error_messages.dart';
 import 'package:plant_app/features/admin/presentation/controllers/admin_controllers.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 
@@ -98,7 +99,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(content: Text(ErrorHandler.getFriendlyErrorMessage(e as Exception)), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -119,7 +120,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
       if (current.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to add product: ${current.error.toString()}'),
+            content: Text(ErrorHandler.getFriendlyErrorMessage(current.error as Exception)),
             backgroundColor: Colors.red,
           ),
         );
@@ -131,7 +132,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
       if (current.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update product: ${current.error.toString()}'),
+            content: Text(ErrorHandler.getFriendlyErrorMessage(current.error as Exception)),
             backgroundColor: Colors.red,
           ),
         );

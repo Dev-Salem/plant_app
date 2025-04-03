@@ -9,6 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:plant_app/core/utils/image_utils.dart';
 import 'package:plant_app/features/scan/domain/models/captured_image.dart';
 import 'package:plant_app/features/scan/presentation/screens/scan_result_screen.dart';
+// Add web camera implementation
+import 'package:plant_app/features/scan/presentation/widgets/web_camera_widget.dart';
 
 class CameraWidget extends StatefulWidget {
   final Function(CapturedImage capturedImage)? onImageCaptured;
@@ -27,6 +29,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   CapturedImage? _capturedImage;
   bool _isCapturing = false;
   int _selectedCameraIndex = 0;
+  bool _isWebCameraAvailable = false;
 
   @override
   void initState() {
@@ -35,9 +38,8 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
     if (!kIsWeb) {
       _initializeCamera();
     } else {
-      setState(() {
-        _isCameraInitialized = true; // Skip camera initialization on web
-      });
+      // For web, we'll check if camera is available
+      _checkWebCameraAvailability();
     }
   }
 
@@ -61,6 +63,15 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
         _initializeController(_selectedCameraIndex);
       }
     }
+  }
+
+  Future<void> _checkWebCameraAvailability() async {
+    // This is handled in web_camera_widget.dart
+    // We'll just set the state to true to show the WebCameraWidget
+    setState(() {
+      _isWebCameraAvailable = true;
+      _isCameraInitialized = true;
+    });
   }
 
   Future<void> _initializeCamera() async {
@@ -109,11 +120,6 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   }
 
   Future<void> _takePicture() async {
-    if (kIsWeb) {
-      await _pickImageFromGallery(); // On web, we'll use the file picker instead
-      return;
-    }
-
     if (_controller == null || !_controller!.value.isInitialized || _isCapturing) {
       return;
     }
@@ -143,6 +149,17 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
       setState(() {
         _isCapturing = false;
       });
+    }
+  }
+
+  // Handle web camera image capture
+  void onWebImageCaptured(CapturedImage capturedImage) {
+    setState(() {
+      _capturedImage = capturedImage;
+    });
+
+    if (widget.onImageCaptured != null) {
+      widget.onImageCaptured!.call(capturedImage);
     }
   }
 
@@ -225,7 +242,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
       return _buildPermissionDeniedWidget();
     }
 
-    if (!_isCameraInitialized && !kIsWeb) {
+    if (!_isCameraInitialized) {
       return const Center(child: CircularProgressIndicator(color: Colors.green));
     }
 
@@ -284,30 +301,8 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                       ),
                     ],
                   )
-                  : kIsWeb
-                  ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.camera_alt, size: 100, color: Colors.grey[400]),
-                        const SizedBox(height: 20),
-                        const Text(
-                          'Camera preview is not available on web',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton.icon(
-                          onPressed: _pickImageFromGallery,
-                          icon: const Icon(Icons.upload_file),
-                          label: const Text('Upload an image'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
+                  : kIsWeb && _isWebCameraAvailable
+                  ? WebCameraWidget(onImageCaptured: onWebImageCaptured)
                   : ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: AspectRatio(
@@ -316,13 +311,13 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                     ),
                   ),
         ),
-        if (!kIsWeb || _capturedImage != null)
+        if (_capturedImage == null)
           Container(
             padding: const EdgeInsets.all(20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                if (!kIsWeb)
+                if (!kIsWeb || !_isWebCameraAvailable)
                   IconButton(
                     icon: const Icon(Icons.flip_camera_ios),
                     color: Colors.white,
@@ -335,7 +330,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                   onPressed: _pickImageFromGallery,
                 ).animate().fade(duration: 300.ms).scale(delay: 150.ms),
 
-                if (!kIsWeb && _capturedImage == null)
+                if (!kIsWeb || (kIsWeb && !_isWebCameraAvailable))
                   GestureDetector(
                     onTap: _takePicture,
                     child: Container(
@@ -393,10 +388,7 @@ class CameraScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          kIsWeb ? 'Upload a plant image' : 'Take a photo of your plant',
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text('Take a photo of your plant', style: const TextStyle(color: Colors.white)),
       ),
       body: SafeArea(
         child: CameraWidget(

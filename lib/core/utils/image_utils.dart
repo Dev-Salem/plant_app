@@ -34,4 +34,22 @@ class ImageUtils {
   static String getFileExtension(String fileName) {
     return fileName.split('.').last.toLowerCase();
   }
+
+  /// Get MIME type based on file extension
+  static String getMimeType(String fileName) {
+    final extension = getFileExtension(fileName);
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'image/jpeg'; // Default to JPEG
+    }
+  }
 }

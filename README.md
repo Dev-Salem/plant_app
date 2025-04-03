@@ -2,9 +2,20 @@
 
 ## 📌 Overview
 
-Planty is a mobile application that leverages Artificial Intelligence (AI) and Computer Vision to help farmers and agricultural specialists diagnose plant diseases instantly. By simply taking a picture of a plant leaf, users receive an instant diagnosis and the ability to purchase agricultural products directly through the app.
+[Planty](https://devsalem.tech/plant_app) is a mobile application that leverages Artificial Intelligence (AI) and Computer Vision to help farmers and agricultural specialists diagnose plant diseases instantly. By simply taking a picture of a plant leaf, users receive an instant diagnosis and the ability to purchase agricultural products directly through the app.
 
----
+
+## Screenshots:
+
+| Screenshot 1 | Screenshot 2 |
+|-------------|-------------|
+| <a href="https://ibb.co/p6h5TB1H"><img src="https://i.ibb.co/9mZS0kpx/Screenshot-20250403-213502.png" width="200"></a> | <a href="https://ibb.co/Vc6ykRxS"><img src="https://i.ibb.co/Q30BxLkN/Screenshot-20250403-213508.png" width="200"></a> |
+| <a href="https://ibb.co/s4WfzbJ"><img src="https://i.ibb.co/dvmTxjJ/Screenshot-20250403-213526.png" width="200"></a> | <a href="https://ibb.co/mVV2tLRB"><img src="https://i.ibb.co/sddNQ0gP/Screenshot-20250403-213543.png" width="200"></a> |
+| <a href="https://ibb.co/zT9zZCST"><img src="https://i.ibb.co/396ncV09/Screenshot-20250403-213622.png" width="200"></a> | <a href="https://ibb.co/pBmT0vT6"><img src="https://i.ibb.co/hJqN7RNx/Screenshot-20250403-213628.jpg" width="200"></a> |
+| <a href="https://ibb.co/q2rQzQm"><img src="https://i.ibb.co/fTxwbwr/Screenshot-20250403-213646.png" width="200"></a> | <a href="https://ibb.co/jZQTqDw9"><img src="https://i.ibb.co/x8BDw6gK/Screenshot-20250403-213650.png" width="200"></a> |
+| <a href="https://ibb.co/Dfx1b1Km"><img src="https://i.ibb.co/603yZysG/Screenshot-20250403-213702.png" width="200"></a> | <a href="https://ibb.co/JMGST4Z"><img src="https://i.ibb.co/5fSJ3yZ/Screenshot-20250403-213711.png" width="200"></a> |
+| <a href="https://ibb.co/G4TCLbN4"><img src="https://i.ibb.co/rRs5S1NR/Screenshot-20250403-213720.png" width="200"></a> | <a href="https://ibb.co/9mKYCwC4"><img src="https://i.ibb.co/0p4JdBd9/Screenshot-20250403-213726.png" width="200"></a> |
+| <a href="https://ibb.co/JwmpLgkB"><img src="https://i.ibb.co/fzqNRL01/Screenshot-20250403-213731.png" width="200"></a> | <a href="https://ibb.co/ZpfLxW0H"><img src="https://i.ibb.co/tTHmD89Z/Screenshot-20250403-213925.png" width="200"></a> |
 
 ## 🚀 Features
 
@@ -21,16 +32,12 @@ Planty is a mobile application that leverages Artificial Intelligence (AI) and C
 - View past scans and AI-generated reports.
 - Track disease trends over time.
 
----
 
 ## 🎯 Target Users
 - Farmers & Growers looking for fast disease diagnosis.
 - Agricultural Specialists needing AI-powered insights.
 - Agriculture Companies selling pesticides and fertilizers.
 
----
-
-## Technical Information
 
 ### Architecture
 
@@ -93,11 +100,15 @@ The application follows [Riverpod/Reference Architecture](https://codewithandrea
 git clone https://github.com/Dev-Salem/plant_app
 ```
 
-### 2️⃣ Install Dependencies
+### 2️⃣ Install Dependencies & configure secrets using (envied)[https://pub.dev/packages/envied]
 ```
 flutter pub get
 ```
-
+Create .env at the root director with these values:
+```
+ENDPOINT=https://cloud.appwrite.io/v1
+PROJECT_ID=project-id-from-appwrite-console
+```
 ### 3️⃣ Run the App
 ```
 flutter run
@@ -501,16 +512,22 @@ if __name__ == "__main__":
 - Deploy the cloud function that connects with Crop API (clone the function and deploy it from the console)
 (Function's Repo)[https://github.com/Dev-Salem/get-detection]
 
----
 
 ## 📜 Business Model & Monetization
 - Freemium Model: Free basic scans with premium features (e.g., detailed analysis).
 - Marketplace Commission: Earn from product sales via partnerships with suppliers.
 - Subscription Plans: Offer advanced AI-based insights for professional farmers.
 
----
+
 
 ## 🔮 Future Enhancements
 - ✔️ Offline Mode – Enable diagnosis without internet.
 - ✔️ Community Forum – Allow farmers to discuss issues.
 - ✔️ Multi-language Support – Expand to other languages.
+
+## Known Issues:
+-   **The demo is deployed on github pages and is not meant for web usage**
+-   images might not render because CORS issues with Crop API
+-   There might be issues with other browsers other than Chrome
+-   Payment for the mini market place isn't configured
+-   Legal documents (like Privacy & Policy, Terms Of Use) are not presented

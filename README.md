@@ -100,7 +100,7 @@ The application follows [Riverpod/Reference Architecture](https://codewithandrea
 git clone https://github.com/Dev-Salem/plant_app
 ```
 
-### 2️⃣ Install Dependencies & configure secrets using (envied)[https://pub.dev/packages/envied]
+### 2️⃣ Install Dependencies & configure secrets using [envied](https://pub.dev/packages/envied)
 ```
 flutter pub get
 ```
@@ -509,8 +509,9 @@ if __name__ == "__main__":
 ```
 </details>
 
-- Deploy the cloud function that connects with Crop API (clone the function and deploy it from the console)
-(Function's Repo)[https://github.com/Dev-Salem/get-detection]
+- Deploy the cloud function that connects with Crop API and the one that gets the user history (clone the function and deploy it from the console)
+[Getting past diagnoses](https://github.com/Dev-Salem/get-detection)
+[Creating a diagnose](https://github.com/Dev-Salem/plant-function)
 
 
 ## 📜 Business Model & Monetization

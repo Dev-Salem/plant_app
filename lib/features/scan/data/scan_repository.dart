@@ -5,6 +5,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:plant_app/core/constants/appwrite_constants.dart';
 import 'package:plant_app/core/utils/image_utils.dart';
 import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/scan/domain/entities.dart';
@@ -37,7 +38,7 @@ class ScanRepository {
 
     // Execute function
     final execution = await functions.createExecution(
-      functionId: '67e94c1a0014fbb416bc',
+      functionId: AppwriteConstants.scanPlantFunctionId,
       body: body,
     );
 
@@ -79,8 +80,8 @@ class ScanRepository {
     final account = await Account(client).get();
     // Create document with the token
     await databases.createDocument(
-      databaseId: 'planty-db-id', // Replace with your database ID
-      collectionId: 'access-tokens', // Replace with your collection ID
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.accessTokensCollection,
       documentId: ID.unique(),
       data: {'access-token': token, "user-id": account.$id},
     );
@@ -90,8 +91,8 @@ class ScanRepository {
     final databases = Databases(client);
     final account = await Account(client).get();
     final documents = await databases.listDocuments(
-      databaseId: "planty-db-id",
-      collectionId: 'access-tokens',
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.accessTokensCollection,
       queries: [Query.equal('user-id', account.$id), Query.equal('token', token)],
     );
     final document = documents.documents.first;
@@ -116,9 +117,10 @@ class ScanRepository {
   }
 
   Future<PlantScanResponse> getScan(String token) async {
-    final execution = await Functions(
-      client,
-    ).createExecution(functionId: 'get-plant-id', body: json.encode({"access-token": token}));
+    final execution = await Functions(client).createExecution(
+      functionId: AppwriteConstants.getPlantIdFunctionId,
+      body: json.encode({"access-token": token}),
+    );
     final response = json.decode(execution.responseBody) as Map<String, dynamic>;
     return PlantScanResponse.fromJson(response);
   }
@@ -127,8 +129,8 @@ class ScanRepository {
     final databases = Databases(client);
     final account = await Account(client).get();
     final documents = await databases.listDocuments(
-      databaseId: "planty-db-id",
-      collectionId: 'access-tokens',
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.accessTokensCollection,
       queries: [Query.equal('user-id', account.$id)],
     );
     return documents.documents.map((d) => d.data["access-token"] as String).toList();

@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/core/constants/appwrite_constants.dart';
 import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -11,10 +12,10 @@ class AppwriteMarketRepository implements IMarketplaceService {
   final String _databaseId;
   final String userId;
   // Collection IDs
-  static const String _productsCollection = 'products';
-  static const String _ordersCollection = 'orders';
-  static const String _orderItemsCollection = 'order_items';
-  static const String _cartItemsCollection = 'cart_items';
+  static const String _productsCollection = AppwriteConstants.productsCollection;
+  static const String _ordersCollection = AppwriteConstants.ordersCollection;
+  static const String _orderItemsCollection = AppwriteConstants.orderItemsCollection;
+  static const String _cartItemsCollection = AppwriteConstants.cartItemsCollection;
 
   AppwriteMarketRepository({
     required Databases databases,
@@ -226,7 +227,7 @@ class AppwriteMarketRepository implements IMarketplaceService {
 @riverpod
 AppwriteMarketRepository marketRepository(Ref ref) {
   final database = Databases(ref.watch(appwriteClientProvider));
-  final databaseId = "planty-db-id";
+  final databaseId = AppwriteConstants.databaseId;
   final user = ref.watch(userProvider).value;
   return AppwriteMarketRepository(
     databases: database,

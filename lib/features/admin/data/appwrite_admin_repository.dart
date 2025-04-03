@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plant_app/core/constants/appwrite_constants.dart';
 import 'package:plant_app/features/auth/data/auth_repository.dart';
 import 'package:plant_app/features/market/domain/entities.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -23,9 +24,9 @@ class AppwriteAdminRepository implements AdminRepository {
   final String _databaseId;
 
   // Collection IDs - using the same as market repository for consistency
-  static const String _productsCollection = 'products';
-  static const String _ordersCollection = 'orders';
-  static const String _orderItemsCollection = 'order_items';
+  static const String _productsCollection = AppwriteConstants.productsCollection;
+  static const String _ordersCollection = AppwriteConstants.ordersCollection;
+  static const String _orderItemsCollection = AppwriteConstants.orderItemsCollection;
 
   AppwriteAdminRepository({required Databases databases, required String databaseId})
     : _databases = databases,
@@ -127,6 +128,6 @@ class AppwriteAdminRepository implements AdminRepository {
 @riverpod
 AppwriteAdminRepository adminRepository(Ref ref) {
   final database = Databases(ref.watch(appwriteClientProvider));
-  final databaseId = "planty-db-id";
+  final databaseId = AppwriteConstants.databaseId;
   return AppwriteAdminRepository(databases: database, databaseId: databaseId);
 }

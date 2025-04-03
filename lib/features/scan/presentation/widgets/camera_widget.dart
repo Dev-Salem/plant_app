@@ -9,8 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:plant_app/core/utils/image_utils.dart';
 import 'package:plant_app/features/scan/domain/models/captured_image.dart';
 import 'package:plant_app/features/scan/presentation/screens/scan_result_screen.dart';
-// Add web camera implementation
-import 'package:plant_app/features/scan/presentation/widgets/web_camera_widget.dart';
+// Remove web camera import
 
 class CameraWidget extends StatefulWidget {
   final Function(CapturedImage capturedImage)? onImageCaptured;
@@ -29,18 +28,12 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   CapturedImage? _capturedImage;
   bool _isCapturing = false;
   int _selectedCameraIndex = 0;
-  bool _isWebCameraAvailable = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (!kIsWeb) {
-      _initializeCamera();
-    } else {
-      // For web, we'll check if camera is available
-      _checkWebCameraAvailability();
-    }
+    _initializeCamera();
   }
 
   @override
@@ -59,19 +52,8 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
     if (state == AppLifecycleState.inactive) {
       _controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      if (!kIsWeb) {
-        _initializeController(_selectedCameraIndex);
-      }
+      _initializeController(_selectedCameraIndex);
     }
-  }
-
-  Future<void> _checkWebCameraAvailability() async {
-    // This is handled in web_camera_widget.dart
-    // We'll just set the state to true to show the WebCameraWidget
-    setState(() {
-      _isWebCameraAvailable = true;
-      _isCameraInitialized = true;
-    });
   }
 
   Future<void> _initializeCamera() async {
@@ -152,17 +134,6 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
     }
   }
 
-  // Handle web camera image capture
-  void onWebImageCaptured(CapturedImage capturedImage) {
-    setState(() {
-      _capturedImage = capturedImage;
-    });
-
-    if (widget.onImageCaptured != null) {
-      widget.onImageCaptured!.call(capturedImage);
-    }
-  }
-
   Future<void> _pickImageFromGallery() async {
     try {
       final capturedImage = await ImageUtils.pickImage(
@@ -185,7 +156,7 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
   }
 
   void _switchCamera() {
-    if (_cameras.length < 2 || kIsWeb) return;
+    if (_cameras.length < 2) return;
     final newIndex = _selectedCameraIndex == 0 ? 1 : 0;
     _initializeController(newIndex);
   }
@@ -254,7 +225,10 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                   ? Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.memory(_capturedImage!.bytes, fit: BoxFit.cover),
+                      // Handle web vs mobile image display
+                      kIsWeb && _capturedImage!.path != null
+                          ? Image.network(_capturedImage!.path!, fit: BoxFit.cover)
+                          : Image.memory(_capturedImage!.bytes, fit: BoxFit.cover),
                       Positioned(
                         bottom: 30,
                         left: 0,
@@ -301,8 +275,6 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                       ),
                     ],
                   )
-                  : kIsWeb && _isWebCameraAvailable
-                  ? WebCameraWidget(onImageCaptured: onWebImageCaptured)
                   : ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: AspectRatio(
@@ -317,12 +289,11 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                if (!kIsWeb || !_isWebCameraAvailable)
-                  IconButton(
-                    icon: const Icon(Icons.flip_camera_ios),
-                    color: Colors.white,
-                    onPressed: _switchCamera,
-                  ).animate().fade(duration: 300.ms).scale(delay: 200.ms),
+                IconButton(
+                  icon: const Icon(Icons.flip_camera_ios),
+                  color: Colors.white,
+                  onPressed: _switchCamera,
+                ).animate().fade(duration: 300.ms).scale(delay: 200.ms),
 
                 IconButton(
                   icon: const Icon(Icons.photo_library),
@@ -330,32 +301,31 @@ class _CameraWidgetState extends State<CameraWidget> with WidgetsBindingObserver
                   onPressed: _pickImageFromGallery,
                 ).animate().fade(duration: 300.ms).scale(delay: 150.ms),
 
-                if (!kIsWeb || (kIsWeb && !_isWebCameraAvailable))
-                  GestureDetector(
-                    onTap: _takePicture,
-                    child: Container(
-                      height: 70,
-                      width: 70,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
-                        color: Colors.transparent,
-                      ),
-                      child: Center(
-                        child:
-                            _isCapturing
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : Container(
-                                  height: 60,
-                                  width: 60,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                      ),
+                GestureDetector(
+                  onTap: _takePicture,
+                  child: Container(
+                    height: 70,
+                    width: 70,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4),
+                      color: Colors.transparent,
                     ),
-                  ).animate().fade(duration: 300.ms).scale(delay: 100.ms),
+                    child: Center(
+                      child:
+                          _isCapturing
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : Container(
+                                height: 60,
+                                width: 60,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                              ),
+                    ),
+                  ),
+                ).animate().fade(duration: 300.ms).scale(delay: 100.ms),
 
                 IconButton(
                   icon: const Icon(Icons.close),

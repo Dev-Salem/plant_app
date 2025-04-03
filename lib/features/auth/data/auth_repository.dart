@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +14,8 @@ class AuthRepository {
 
   Future<String> signInWithEmail(String email) async {
     final account = Account(client);
-    _testLogin(email, account);
+    final testAccount = await _testLogin(email, account);
+    if (testAccount != null) return testAccount;
     final result = await account.createEmailToken(userId: ID.unique(), email: email);
     return result.userId;
   }
@@ -31,10 +34,11 @@ class AuthRepository {
   Future<void> verifyOTP(String userId, String otp) async {
     final account = Account(client);
     if (userId == TestAccount.userId) {
-      await account.createSession(userId: userId, secret: '417103');
+      await account.createSession(userId: TestAccount.userId, secret: TestAccount.otp);
       return;
+    } else {
+      await account.createSession(userId: userId, secret: otp);
     }
-    await account.createSession(userId: userId, secret: otp);
   }
 
   Future<void> signOut() async {
